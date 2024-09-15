@@ -1,0 +1,7 @@
+name: 'Azure Deploy'
+description: 'GitHub Action for deploying to Azure'
+author: 'Microsoft'
+
+runs:
+  using: node20
+  main: dist/index.js
