@@ -2,6 +2,98 @@ name: 'Azure Deploy'
 description: 'GitHub Action for deploying to Azure'
 author: 'Microsoft'
 
+inputs:
+  type:
+    description: ''
+    required: true
+  operation:
+    description: ''
+    required: true
+
+  name:
+    description: ''
+    required: true
+  location:
+    description: ''
+    required: true
+
+  scope:
+    description: ''
+    required: true
+  tenant-id:
+    description: ''
+    required: false
+  management-group-id:
+    description: ''
+    required: false
+  subscription-id:
+    description: ''
+    required: false
+  resource-group-name:
+    description: ''
+    required: false
+
+  template-file:
+    description: ''
+    required: false
+  template-spec:
+    description: ''
+    required: false
+  template-uri:
+    description: ''
+    required: false
+
+  parameters:
+    description: ''
+    required: false
+
+  what-if:
+    description: ''
+    required: false
+    default: ''
+  what-if-exclude-change-type:
+    description: ''
+    required: false
+    default: ''
+  what-if-result-format:
+    description: ''
+    required: false
+    default: ''
+
+  action-on-unmanage:
+    description: ''
+    required: false
+    default: ''
+  deny-settings-mode:
+    description: ''
+    required: false
+    default: ''
+  deny-settings-excluded-action:
+    description: ''
+    required: false
+    default: ''
+  deny-settings-excluded-principals:
+    description: ''
+    required: false
+    default: ''
+  bypass-stack-out-of-sync-error:
+    description: ''
+    required: false
+    default: ''
+
+  description:
+    description: ''
+    required: false
+
+  tags:
+    description: ''
+    required: false
+
+  await:
+    description: ''
+    required: false
+    default: 'true'
+
 runs:
   using: node20
   main: dist/index.js
