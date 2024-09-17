@@ -1,15 +1,57 @@
-# Project
+# Azure Deployment Action
 
-> This repo has been populated by an initial template to help get you started.
-> Please make sure to update the content to build a great experience for
-> community-building.
+This repository contains a GitHub Action for deploying and managing Azure
+resources using ARM Templates or Bicep files. With this action, users can:
 
-As the maintainer of this project, please make a few updates:
+- Create resources through Azure Deployments.
+- Manage entire stacks with Azure Deployment Stacks, including creating and
+  deleting resources.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+This tool streamlines the deployment process, making it easier to manage Azure
+resources directly from your GitHub workflows.
+
+## Usage
+
+Deployment
+
+```yaml
+- name: Deployment
+  uses: azure/deploy@v1
+  with:
+    operation: deployment
+    type: create
+    name: Microsoft.Deployment
+    location: westus2
+    scope: subscription
+    subscription-id: 00000000-0000-0000-0000-000000000000
+    template-file: ./main.bicep
+    parameters: ./main.bicepparam
+```
+
+Deployment Stack
+
+```yaml
+- name: Deployment
+  uses: azure/deploy@v1
+  with:
+    operation: deploymentStack
+    type: create
+    name: Development
+    location: westus2
+    scope: subscription
+    subscription-id: 00000000-0000-0000-0000-000000000000
+    template-file: ./main.bicep
+    parameters: |
+      {"count": { "value": "5"}, "runner": { "value": "${{ inputs.runner }}" }}
+    action-on-unmanage: deleteAll
+    deny-settings-mode: denyWriteAndDelete
+```
+
+## Dependencies
+
+- [Login](https://github.com/azure/login): Login with your Azure credentials
+- [Checkout](https://github.com/actions/checkout): Checks out your repository in
+  runner workspace.
 
 ## Contributing
 
