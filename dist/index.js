@@ -51591,6 +51591,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StackDeploymentHandler = exports.ResourceDeploymentHandler = exports.BaseDeploymentHandler = void 0;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 const helpers = __importStar(__nccwpck_require__(3202));
 class BaseDeploymentHandler {
@@ -51611,33 +51613,45 @@ class ResourceDeploymentHandler extends BaseDeploymentHandler {
             };
             switch (this.config.scope) {
                 case 'tenant': {
-                    this.config.await
-                        ? yield this.client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginCreateOrUpdateAtTenantScope(this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginCreateOrUpdateAtTenantScope(this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'managementGroup': {
                     const managementGroupId = helpers.isManagementGroupContext(this.config.context)
                         ? this.config.context.managementGroupId
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(managementGroupId, this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginCreateOrUpdateAtManagementGroupScope(managementGroupId, this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(managementGroupId, this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginCreateOrUpdateAtManagementGroupScope(managementGroupId, this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'subscription': {
-                    this.config.await
-                        ? yield this.client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginCreateOrUpdateAtSubscriptionScope(this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginCreateOrUpdateAtSubscriptionScope(this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'resourceGroup': {
                     const resourceGroupName = helpers.isResourceGroupContext(this.config.context)
                         ? this.config.context.resourceGroupName
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deployments.beginCreateOrUpdateAndWait(resourceGroupName, this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginCreateOrUpdate(resourceGroupName, this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginCreateOrUpdateAndWait(resourceGroupName, this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginCreateOrUpdate(resourceGroupName, this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 default: {
@@ -51656,33 +51670,45 @@ class ResourceDeploymentHandler extends BaseDeploymentHandler {
             };
             switch (this.config.scope) {
                 case 'tenant': {
-                    this.config.await
-                        ? yield this.client.deployments.beginValidateAtTenantScopeAndWait(this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginValidateAtTenantScope(this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginValidateAtTenantScopeAndWait(this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginValidateAtTenantScope(this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'managementGroup': {
                     const managementGroupId = helpers.isManagementGroupContext(this.config.context)
                         ? this.config.context.managementGroupId
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deployments.beginValidateAtManagementGroupScopeAndWait(managementGroupId, this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginValidateAtManagementGroupScope(managementGroupId, this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginValidateAtManagementGroupScopeAndWait(managementGroupId, this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginValidateAtManagementGroupScope(managementGroupId, this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'subscription': {
-                    this.config.await
-                        ? yield this.client.deployments.beginValidateAtSubscriptionScopeAndWait(this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginValidateAtSubscriptionScope(this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginValidateAtSubscriptionScopeAndWait(this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginValidateAtSubscriptionScope(this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'resourceGroup': {
                     const resourceGroupName = helpers.isResourceGroupContext(this.config.context)
                         ? this.config.context.resourceGroupName
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deployments.beginValidateAndWait(resourceGroupName, this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginValidate(resourceGroupName, this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginValidateAndWait(resourceGroupName, this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginValidate(resourceGroupName, this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 default: {
@@ -51701,33 +51727,45 @@ class ResourceDeploymentHandler extends BaseDeploymentHandler {
             };
             switch (this.config.scope) {
                 case 'tenant': {
-                    this.config.await
-                        ? yield this.client.deployments.beginWhatIfAtTenantScopeAndWait(this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginWhatIfAtTenantScope(this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginWhatIfAtTenantScopeAndWait(this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginWhatIfAtTenantScope(this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'managementGroup': {
                     const managementGroupId = helpers.isManagementGroupContext(this.config.context)
                         ? this.config.context.managementGroupId
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deployments.beginWhatIfAtManagementGroupScopeAndWait(managementGroupId, this.config.name, deploymentParams)
-                        : this.client.deployments.beginWhatIfAtManagementGroupScope(managementGroupId, this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginWhatIfAtManagementGroupScopeAndWait(managementGroupId, this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginWhatIfAtManagementGroupScope(managementGroupId, this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'subscription': {
-                    this.config.await
-                        ? this.client.deployments.beginWhatIfAtSubscriptionScopeAndWait(this.config.name, deploymentParams)
-                        : this.client.deployments.beginWhatIfAtSubscriptionScope(this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        this.client.deployments.beginWhatIfAtSubscriptionScopeAndWait(this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginWhatIfAtSubscriptionScope(this.config.name, deploymentParams);
+                    }
                     break;
                 }
                 case 'resourceGroup': {
                     const resourceGroupName = helpers.isResourceGroupContext(this.config.context)
                         ? this.config.context.resourceGroupName
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deployments.beginWhatIfAndWait(resourceGroupName, this.config.name, deploymentParams)
-                        : yield this.client.deployments.beginWhatIf(resourceGroupName, this.config.name, deploymentParams);
+                    if (this.config.await) {
+                        yield this.client.deployments.beginWhatIfAndWait(resourceGroupName, this.config.name, deploymentParams);
+                    }
+                    else {
+                        yield this.client.deployments.beginWhatIf(resourceGroupName, this.config.name, deploymentParams);
+                    }
                     break;
                 }
             }
@@ -51749,24 +51787,33 @@ class StackDeploymentHandler extends BaseDeploymentHandler {
                     const managementGroupId = helpers.isManagementGroupContext(this.config.context)
                         ? this.config.context.managementGroupId
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(managementGroupId, this.config.name, stackParams)
-                        : yield this.client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(managementGroupId, this.config.name, stackParams);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(managementGroupId, this.config.name, stackParams);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginCreateOrUpdateAtManagementGroup(managementGroupId, this.config.name, stackParams);
+                    }
                     break;
                 }
                 case 'subscription': {
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(this.config.name, stackParams)
-                        : yield this.client.deploymentStacks.beginCreateOrUpdateAtSubscription(this.config.name, stackParams);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(this.config.name, stackParams);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginCreateOrUpdateAtSubscription(this.config.name, stackParams);
+                    }
                     break;
                 }
                 case 'resourceGroup': {
                     const resourceGroupName = helpers.isResourceGroupContext(this.config.context)
                         ? this.config.context.resourceGroupName
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(resourceGroupName, this.config.name, stackParams)
-                        : yield this.client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(resourceGroupName, this.config.name, stackParams);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(resourceGroupName, this.config.name, stackParams);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginCreateOrUpdateAtResourceGroup(resourceGroupName, this.config.name, stackParams);
+                    }
                     break;
                 }
                 default: {
@@ -51788,24 +51835,33 @@ class StackDeploymentHandler extends BaseDeploymentHandler {
                     const managementGroupId = helpers.isManagementGroupContext(this.config.context)
                         ? this.config.context.managementGroupId
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(managementGroupId, this.config.name, stackParams)
-                        : yield this.client.deploymentStacks.beginValidateStackAtManagementGroup(managementGroupId, this.config.name, stackParams);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(managementGroupId, this.config.name, stackParams);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginValidateStackAtManagementGroup(managementGroupId, this.config.name, stackParams);
+                    }
                     break;
                 }
                 case 'subscription': {
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(this.config.name, stackParams)
-                        : yield this.client.deploymentStacks.beginValidateStackAtSubscription(this.config.name, stackParams);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(this.config.name, stackParams);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginValidateStackAtSubscription(this.config.name, stackParams);
+                    }
                     break;
                 }
                 case 'resourceGroup': {
                     const resourceGroupName = helpers.isResourceGroupContext(this.config.context)
                         ? this.config.context.resourceGroupName
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(resourceGroupName, this.config.name, stackParams)
-                        : yield this.client.deploymentStacks.beginValidateStackAtResourceGroup(resourceGroupName, this.config.name, stackParams);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(resourceGroupName, this.config.name, stackParams);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginValidateStackAtResourceGroup(resourceGroupName, this.config.name, stackParams);
+                    }
                     break;
                 }
                 default: {
@@ -51822,24 +51878,33 @@ class StackDeploymentHandler extends BaseDeploymentHandler {
                     const managementGroupId = helpers.isManagementGroupContext(this.config.context)
                         ? this.config.context.managementGroupId
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginDeleteAtManagementGroupAndWait(managementGroupId, this.config.name)
-                        : yield this.client.deploymentStacks.beginDeleteAtManagementGroup(managementGroupId, this.config.name);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginDeleteAtManagementGroupAndWait(managementGroupId, this.config.name);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginDeleteAtManagementGroup(managementGroupId, this.config.name);
+                    }
                     break;
                 }
                 case 'subscription': {
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginDeleteAtSubscriptionAndWait(this.config.name)
-                        : yield this.client.deploymentStacks.beginDeleteAtSubscription(this.config.name);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginDeleteAtSubscriptionAndWait(this.config.name);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginDeleteAtSubscription(this.config.name);
+                    }
                     break;
                 }
                 case 'resourceGroup': {
                     const resourceGroupName = helpers.isResourceGroupContext(this.config.context)
                         ? this.config.context.resourceGroupName
                         : helpers.throwError('Invalid context');
-                    this.config.await
-                        ? yield this.client.deploymentStacks.beginDeleteAtResourceGroupAndWait(resourceGroupName, this.config.name)
-                        : yield this.client.deploymentStacks.beginDeleteAtResourceGroup(resourceGroupName, this.config.name);
+                    if (this.config.await) {
+                        yield this.client.deploymentStacks.beginDeleteAtResourceGroupAndWait(resourceGroupName, this.config.name);
+                    }
+                    else {
+                        yield this.client.deploymentStacks.beginDeleteAtResourceGroup(resourceGroupName, this.config.name);
+                    }
                     break;
                 }
                 default: {
@@ -51888,6 +51953,8 @@ exports.isTenantContext = isTenantContext;
 exports.isManagementGroupContext = isManagementGroupContext;
 exports.isSubscriptionContext = isSubscriptionContext;
 exports.isResourceGroupContext = isResourceGroupContext;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 const helpers = __importStar(__nccwpck_require__(3202));
 function getContextInput() {
@@ -51938,6 +52005,8 @@ function isResourceGroupContext(context) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.throwError = throwError;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 function throwError(message) {
     throw new Error(message);
 }
@@ -51985,6 +52054,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getTemplate = getTemplate;
 exports.getParameters = getParameters;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(9990));
 const io = __importStar(__nccwpck_require__(7436));
@@ -52101,6 +52172,8 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 __exportStar(__nccwpck_require__(7606), exports);
 __exportStar(__nccwpck_require__(8922), exports);
 __exportStar(__nccwpck_require__(9942), exports);
@@ -52139,6 +52212,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getInput = getInput;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 const helpers = __importStar(__nccwpck_require__(3202));
 function getInput(inputName, allowedValues, throwOnMissing = true) {
@@ -52199,6 +52274,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 const arm_resources_1 = __nccwpck_require__(4280);
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
@@ -76781,9 +76858,8 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-/**
- * The entrypoint for the action.
- */
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 const main_1 = __nccwpck_require__(399);
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (0, main_1.run)();
