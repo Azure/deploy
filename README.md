@@ -4,7 +4,7 @@ This repository contains a GitHub Action for deploying and managing Azure
 resources using ARM Templates or Bicep files. With this action, users can:
 
 - Create resources through Azure Deployments.
-- Manage entire stacks with Azure Deployment Stacks, including creating and
+- Manage environments with Azure Deployment Stacks, including creating and
   deleting resources.
 
 This tool streamlines the deployment process, making it easier to manage Azure
