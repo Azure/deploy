@@ -8,7 +8,7 @@ resources using ARM Templates or Bicep files. With this action, users can:
   deleting resources.
 
 This tool streamlines the deployment process, making it easier to manage Azure
-resources directly from your GitHub workflows.
+resources directly from GitHub workflows.
 
 ## Usage
 
@@ -49,9 +49,10 @@ Deployment Stack
 
 ## Dependencies
 
-- [Login](https://github.com/azure/login): Login with your Azure credentials
-- [Checkout](https://github.com/actions/checkout): Checks out your repository in
-  runner workspace.
+- [Login](https://github.com/azure/login): This action is used to authenticate
+  the GitHub Actions workflow with Azure Resource Manager (ARM).
+- [Checkout](https://github.com/actions/checkout): This action checks out the
+  repository where the workflow is running onto the GitHub Actions runner.
 
 ## Contributing
 
