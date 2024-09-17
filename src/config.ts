@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import { DeploymentProperties } from '@azure/arm-resources'
 import { DeploymentStackProperties } from '@azure/arm-resourcesdeploymentstacks'
 

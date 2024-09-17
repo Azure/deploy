@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import * as core from '@actions/core'
 
 import { ResourceManagementClient } from '@azure/arm-resources'
