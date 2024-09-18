@@ -41,6 +41,9 @@ jobs:
         run: npm run test
 
   test-action:
+    permissions:
+      contents: read
+      id-token: write
     name: GitHub Actions Test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -69,7 +72,7 @@ jobs:
           type: deployment
           operation: create
           name: azure-deploy-ci-${{ matrix.os }}
-          scope: resourcegroup
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: azure-deploy-ci
-          parametersFile: test/files/basic/main.bicepparam
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: azure-deploy-ci
+          parameters-file: test/files/basic/main.bicepparam

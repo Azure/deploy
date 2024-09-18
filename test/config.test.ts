@@ -44,64 +44,64 @@ describe('input validation', () => {
     expect(() => parseConfig()).toThrow("Action input 'operation' must be one of the following values: 'create', 'validate', 'delete'");
   });
 
-  it('requires subscriptionId if scopeType is subscription', async () => {
-    configureGetInputMock({type: 'deployment', operation: 'create', scopeType: 'subscription'});
-    expect(() => parseConfig()).toThrow("Action input 'subscriptionId' is required but not provided");
+  it('requires subscription-id if scope is subscription', async () => {
+    configureGetInputMock({type: 'deployment', operation: 'create', scope: 'subscription'});
+    expect(() => parseConfig()).toThrow("Action input 'subscription-id' is required but not provided");
   });
 
-  it('requires subscriptionId if scopeType is resourceGroup', async () => {
-    configureGetInputMock({type: 'deployment', operation: 'create', scopeType: 'resourceGroup'});
-    expect(() => parseConfig()).toThrow("Action input 'subscriptionId' is required but not provided");
+  it('requires subscription-id if scope is resourceGroup', async () => {
+    configureGetInputMock({type: 'deployment', operation: 'create', scope: 'resourceGroup'});
+    expect(() => parseConfig()).toThrow("Action input 'subscription-id' is required but not provided");
   });
 
-  it('requires resourceGroup if scopeType is resourceGroup', async () => {
-    configureGetInputMock({type: 'deployment', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo'});
-    expect(() => parseConfig()).toThrow("Action input 'resourceGroup' is required but not provided");
+  it('requires resource-group-name if scope is resourceGroup', async () => {
+    configureGetInputMock({type: 'deployment', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo'});
+    expect(() => parseConfig()).toThrow("Action input 'resource-group-name' is required but not provided");
   });
 
-  it('requires managementGroup if scopeType is managementGroup', async () => {
-    configureGetInputMock({type: 'deployment', operation: 'create', scopeType: 'managementGroup'});
-    expect(() => parseConfig()).toThrow("Action input 'managementGroup' is required but not provided");
+  it('requires management-group-id if scope is managementGroup', async () => {
+    configureGetInputMock({type: 'deployment', operation: 'create', scope: 'managementGroup'});
+    expect(() => parseConfig()).toThrow("Action input 'management-group-id' is required but not provided");
   });
 
   it('blocks tenant if type is deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'tenant'});
-    expect(() => parseConfig()).toThrow("Action input 'scopeType' must be one of the following values: 'managementGroup', 'subscription', 'resourceGroup'");
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'tenant'});
+    expect(() => parseConfig()).toThrow("Action input 'scope' must be one of the following values: 'managementGroup', 'subscription', 'resourceGroup'");
   });
 
-  it('requires actionOnUnManageResources for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg'});
-    expect(() => parseConfig()).toThrow("Action input 'actionOnUnManageResources' is required but not provided");
+  it('requires action-on-unmanage-resources for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg'});
+    expect(() => parseConfig()).toThrow("Action input 'action-on-unmanage-resources' is required but not provided");
   });
 
-  it('validates actionOnUnManageResources inputs for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg', actionOnUnManageResources: 'sadf'});
-    expect(() => parseConfig()).toThrow("Action input 'actionOnUnManageResources' must be one of the following values: 'delete', 'detach'");
+  it('validates action-on-unmanage-resources inputs for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg', 'action-on-unmanage-resources': 'sadf'});
+    expect(() => parseConfig()).toThrow("Action input 'action-on-unmanage-resources' must be one of the following values: 'delete', 'detach'");
   });
 
-  it('validates actionOnUnManageResourceGroups inputs for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg', actionOnUnManageResources: 'detach', actionOnUnManageResourceGroups: 'sadf'});
-    expect(() => parseConfig()).toThrow("Action input 'actionOnUnManageResourceGroups' must be one of the following values: 'delete', 'detach'");
+  it('validates action-on-unmanage-resourcegroups inputs for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg', 'action-on-unmanage-resources': 'detach', 'action-on-unmanage-resourcegroups': 'sadf'});
+    expect(() => parseConfig()).toThrow("Action input 'action-on-unmanage-resourcegroups' must be one of the following values: 'delete', 'detach'");
   });
 
-  it('validates actionOnUnManageManagementGroups inputs for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg', actionOnUnManageResources: 'detach', actionOnUnManageManagementGroups: 'sadf'});
-    expect(() => parseConfig()).toThrow("Action input 'actionOnUnManageManagementGroups' must be one of the following values: 'delete', 'detach'");
+  it('validates action-on-unmanage-managementgroups inputs for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg', 'action-on-unmanage-resources': 'detach', 'action-on-unmanage-managementgroups': 'sadf'});
+    expect(() => parseConfig()).toThrow("Action input 'action-on-unmanage-managementgroups' must be one of the following values: 'delete', 'detach'");
   });
 
-  it('requires denySettingsMode inputs for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg', actionOnUnManageResources: 'detach'});
-    expect(() => parseConfig()).toThrow("Action input 'denySettingsMode' is required but not provided");
+  it('requires deny-settings-mode inputs for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg', 'action-on-unmanage-resources': 'detach'});
+    expect(() => parseConfig()).toThrow("Action input 'deny-settings-mode' is required but not provided");
   });
 
-  it('validates denySettingsMode inputs for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg', actionOnUnManageResources: 'detach', denySettingsMode: 'asdfasdf'});
-    expect(() => parseConfig()).toThrow("Action input 'denySettingsMode' must be one of the following values: 'denyDelete', 'denyWriteAndDelete', 'none'");
+  it('validates deny-settings-mode inputs for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg', 'action-on-unmanage-resources': 'detach', 'deny-settings-mode': 'asdfasdf'});
+    expect(() => parseConfig()).toThrow("Action input 'deny-settings-mode' must be one of the following values: 'denyDelete', 'denyWriteAndDelete', 'none'");
   });
 
-  it('validates bypassStackOutOfSyncError inputs for deploymentStack', async () => {
-    configureGetInputMock({type: 'deploymentStack', operation: 'create', scopeType: 'resourceGroup', subscriptionId: 'foo', resourceGroup: 'mockRg', actionOnUnManageResources: 'detach', bypassStackOutOfSyncError: 'asdfasdf'});
-    expect(() => parseConfig()).toThrow("Action input 'bypassStackOutOfSyncError' must be a boolean value");
+  it('validates bypass-stack-out-of-sync-error inputs for deploymentStack', async () => {
+    configureGetInputMock({type: 'deploymentStack', operation: 'create', scope: 'resourceGroup', 'subscription-id': 'foo', 'resource-group-name': 'mockRg', 'action-on-unmanage-resources': 'detach', 'bypass-stack-out-of-sync-error': 'asdfasdf'});
+    expect(() => parseConfig()).toThrow("Action input 'bypass-stack-out-of-sync-error' must be a boolean value");
   });
 });
 
@@ -111,12 +111,12 @@ describe('input parsing', () => {
       type: 'deployment',
       name: 'mockName',
       operation: 'create',
-      scopeType: 'resourceGroup',
-      subscriptionId: 'mockSub',
-      resourceGroup: 'mockRg',
+      scope: 'resourceGroup',
+      'subscription-id': 'mockSub',
+      'resource-group-name': 'mockRg',
       location: 'mockLocation',
-      templateFile: 'mockTemplateFile',
-      parametersFile: 'mockParametersFile',
+      'template-file': '/path/to/mockTemplateFile',
+      'parameters-file': '/path/to/mockParametersFile',
       description: 'mockDescription',
       tags: '{"foo": "bar"}',
     });
@@ -132,8 +132,8 @@ describe('input parsing', () => {
         resourceGroup: 'mockRg',
       },
       location: 'mockLocation',
-      templateFile: 'mockTemplateFile',
-      parametersFile: 'mockParametersFile',
+      templateFile: '/path/to/mockTemplateFile',
+      parametersFile: '/path/to/mockParametersFile',
       tags: {
         foo: 'bar',
       },
@@ -145,20 +145,20 @@ describe('input parsing', () => {
       type: 'deploymentStack',
       name: 'mockName',
       operation: 'delete',
-      scopeType: 'subscription',
-      subscriptionId: 'mockSub',
+      scope: 'subscription',
+      'subscription-id': 'mockSub',
       location: 'mockLocation',
-      templateFile: 'mockTemplateFile',
-      parametersFile: 'mockParametersFile',
+      'template-file': '/path/to/mockTemplateFile',
+      'parameters-file': '/path/to/mockParametersFile',
       description: 'mockDescription',
       tags: '{"foo": "bar"}',
-      actionOnUnManageResources: 'delete',
-      actionOnUnManageResourceGroups: 'delete',
-      actionOnUnManageManagementGroups: 'delete',
-      denySettingsMode: 'none',
-      denySettingsExcludedActions: JSON.stringify(['abc', 'def']),
-      denySettingsExcludedPrincipals: JSON.stringify(['ghi', 'jkl']),
-      bypassStackOutOfSyncError: 'true',
+      'action-on-unmanage-resources': 'delete',
+      'action-on-unmanage-resourcegroups': 'delete',
+      'action-on-unmanage-managementgroups': 'delete',
+      'deny-settings-mode': 'none',
+      'deny-settings-excluded-actions': JSON.stringify(['abc', 'def']),
+      'deny-settings-excluded-principals': JSON.stringify(['ghi', 'jkl']),
+      'bypass-stack-out-of-sync-error': 'true',
     });
 
     const config = parseConfig();
@@ -171,8 +171,8 @@ describe('input parsing', () => {
         subscriptionId: 'mockSub',
       },
       location: 'mockLocation',
-      templateFile: 'mockTemplateFile',
-      parametersFile: 'mockParametersFile',
+      templateFile: '/path/to/mockTemplateFile',
+      parametersFile: '/path/to/mockParametersFile',
       description: 'mockDescription',
       tags: {
         foo: 'bar',

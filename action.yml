@@ -43,7 +43,7 @@ inputs:
     description: ''
     required: false
 
-  parameters:
+  parameters-file:
     description: ''
     required: false
 

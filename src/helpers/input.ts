@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import * as core from '@actions/core'
-
 import * as helpers from '../helpers'
 
 export function getRequiredEnumInput<TEnum extends string>(
@@ -24,6 +23,15 @@ export function getRequiredStringInput(inputName: string): string {
 
 export function getOptionalStringInput(inputName: string): string | undefined {
   return getInput(inputName, undefined, false);
+}
+
+export function getOptionalFilePath(inputName: string): string | undefined {
+  const input = getOptionalStringInput(inputName);
+  if (!input) {
+    return;
+  }
+
+  return helpers.resolvePath(input);
 }
 
 export function getOptionalBooleanInput(inputName: string): boolean {

@@ -31,11 +31,20 @@ az role assignment create \
   --assignee-principal-type ServicePrincipal \
   --scope /subscriptions/$subId/resourceGroups/$rgName >/dev/null
 
-repoSubject="repo:$repoOwner/$repoName:ref:refs/heads/main"
-if [[ -z $(az ad app federated-credential show --id $appId --federated-credential-id $repoName 2>/dev/null) ]]; then
+credName="cimain"
+credSubject="repo:$repoOwner/$repoName:ref:refs/heads/main"
+if [[ -z $(az ad app federated-credential show --id $appId --federated-credential-id $credName 2>/dev/null) ]]; then
   az ad app federated-credential create \
     --id $appId \
-    --parameters '{"name":"'$repoName'","issuer":"https://token.actions.githubusercontent.com","subject":"'$repoSubject'","description":"GitHub OIDC Connection","audiences":["api://AzureADTokenExchange"]}' >/dev/null
+    --parameters '{"name":"'$credName'","issuer":"https://token.actions.githubusercontent.com","subject":"'$credSubject'","description":"GitHub OIDC Connection","audiences":["api://AzureADTokenExchange"]}' >/dev/null
+fi
+
+credName="cipullrequest"
+credSubject="repo:$repoOwner/$repoName:pull_request"
+if [[ -z $(az ad app federated-credential show --id $appId --federated-credential-id $credName 2>/dev/null) ]]; then
+  az ad app federated-credential create \
+    --id $appId \
+    --parameters '{"name":"'$credName'","issuer":"https://token.actions.githubusercontent.com","subject":"'$credSubject'","description":"GitHub OIDC Connection","audiences":["api://AzureADTokenExchange"]}' >/dev/null
 fi
 
 gh -R $repoOwner/$repoName secret set AZURE_CLIENT_ID --body $appId

@@ -107,3 +107,7 @@ async function withBicep<T>(bicepPath: string, action: (bicep: Bicep) => Promise
     bicep.dispose();
   }
 }
+
+export function resolvePath(fileName: string) {
+  return path.resolve(fileName);
+}

@@ -57997,8 +57997,8 @@ function parseConfig() {
     const type = helpers.getRequiredEnumInput('type', ['deployment', 'deploymentStack']);
     const name = helpers.getOptionalStringInput('name');
     const location = helpers.getOptionalStringInput('location');
-    const templateFile = helpers.getOptionalStringInput('templateFile');
-    const parametersFile = helpers.getOptionalStringInput('parametersFile');
+    const templateFile = helpers.getOptionalFilePath('template-file');
+    const parametersFile = helpers.getOptionalFilePath('parameters-file');
     const description = helpers.getOptionalStringInput('description');
     const tags = helpers.getOptionalStringDictionaryInput('tags');
     switch (type) {
@@ -58026,23 +58026,23 @@ function parseConfig() {
                 operation: helpers.getRequiredEnumInput('operation', ['create', 'validate', 'delete']),
                 scope: parseDeploymentStackScope(),
                 actionOnUnManage: {
-                    resources: helpers.getRequiredEnumInput('actionOnUnManageResources', ['delete', 'detach']),
-                    resourceGroups: helpers.getOptionalEnumInput('actionOnUnManageResourceGroups', ['delete', 'detach']),
-                    managementGroups: helpers.getOptionalEnumInput('actionOnUnManageManagementGroups', ['delete', 'detach']),
+                    resources: helpers.getRequiredEnumInput('action-on-unmanage-resources', ['delete', 'detach']),
+                    resourceGroups: helpers.getOptionalEnumInput('action-on-unmanage-resourcegroups', ['delete', 'detach']),
+                    managementGroups: helpers.getOptionalEnumInput('action-on-unmanage-managementgroups', ['delete', 'detach']),
                 },
-                bypassStackOutOfSyncError: helpers.getOptionalBooleanInput('bypassStackOutOfSyncError'),
+                bypassStackOutOfSyncError: helpers.getOptionalBooleanInput('bypass-stack-out-of-sync-error'),
                 denySettings: {
-                    mode: helpers.getRequiredEnumInput('denySettingsMode', ['denyDelete', 'denyWriteAndDelete', 'none']),
-                    excludedActions: helpers.getOptionalStringArrayInput('denySettingsExcludedActions'),
-                    excludedPrincipals: helpers.getOptionalStringArrayInput('denySettingsExcludedPrincipals'),
+                    mode: helpers.getRequiredEnumInput('deny-settings-mode', ['denyDelete', 'denyWriteAndDelete', 'none']),
+                    excludedActions: helpers.getOptionalStringArrayInput('deny-settings-excluded-actions'),
+                    excludedPrincipals: helpers.getOptionalStringArrayInput('deny-settings-excluded-principals'),
                 },
             };
         }
     }
 }
 function parseDeploymentScope() {
-    const type = helpers.getRequiredEnumInput('scopeType', ['tenant', 'managementGroup', 'subscription', 'resourceGroup']);
-    const tenantId = helpers.getOptionalStringInput('tenantId');
+    const type = helpers.getRequiredEnumInput('scope', ['tenant', 'managementGroup', 'subscription', 'resourceGroup']);
+    const tenantId = helpers.getOptionalStringInput('tenant-id');
     switch (type) {
         case 'tenant': {
             return {
@@ -58051,7 +58051,7 @@ function parseDeploymentScope() {
             };
         }
         case 'managementGroup': {
-            const managementGroup = helpers.getRequiredStringInput('managementGroup');
+            const managementGroup = helpers.getRequiredStringInput('management-group-id');
             return {
                 type,
                 tenantId,
@@ -58059,7 +58059,7 @@ function parseDeploymentScope() {
             };
         }
         case 'subscription': {
-            const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
+            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
             return {
                 type,
                 tenantId,
@@ -58067,8 +58067,8 @@ function parseDeploymentScope() {
             };
         }
         case 'resourceGroup': {
-            const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
-            const resourceGroup = helpers.getRequiredStringInput('resourceGroup');
+            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
+            const resourceGroup = helpers.getRequiredStringInput('resource-group-name');
             return {
                 type,
                 tenantId,
@@ -58079,11 +58079,11 @@ function parseDeploymentScope() {
     }
 }
 function parseDeploymentStackScope() {
-    const type = helpers.getRequiredEnumInput('scopeType', ['managementGroup', 'subscription', 'resourceGroup']);
-    const tenantId = helpers.getOptionalStringInput('tenantId');
+    const type = helpers.getRequiredEnumInput('scope', ['managementGroup', 'subscription', 'resourceGroup']);
+    const tenantId = helpers.getOptionalStringInput('tenant-id');
     switch (type) {
         case 'managementGroup': {
-            const managementGroup = helpers.getRequiredStringInput('managementGroup');
+            const managementGroup = helpers.getRequiredStringInput('management-group-id');
             return {
                 type,
                 tenantId,
@@ -58091,7 +58091,7 @@ function parseDeploymentStackScope() {
             };
         }
         case 'subscription': {
-            const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
+            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
             return {
                 type,
                 tenantId,
@@ -58099,8 +58099,8 @@ function parseDeploymentStackScope() {
             };
         }
         case 'resourceGroup': {
-            const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
-            const resourceGroup = helpers.getRequiredStringInput('resourceGroup');
+            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
+            const resourceGroup = helpers.getRequiredStringInput('resource-group-name');
             return {
                 type,
                 tenantId,
@@ -58416,6 +58416,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getTemplateAndParameters = getTemplateAndParameters;
 exports.parse = parse;
+exports.resolvePath = resolvePath;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
@@ -58507,6 +58508,9 @@ function withBicep(bicepPath, action) {
         }
     });
 }
+function resolvePath(fileName) {
+    return path.resolve(fileName);
+}
 
 
 /***/ }),
@@ -58573,6 +58577,7 @@ exports.getRequiredEnumInput = getRequiredEnumInput;
 exports.getOptionalEnumInput = getOptionalEnumInput;
 exports.getRequiredStringInput = getRequiredStringInput;
 exports.getOptionalStringInput = getOptionalStringInput;
+exports.getOptionalFilePath = getOptionalFilePath;
 exports.getOptionalBooleanInput = getOptionalBooleanInput;
 exports.getOptionalStringArrayInput = getOptionalStringArrayInput;
 exports.getOptionalStringDictionaryInput = getOptionalStringDictionaryInput;
@@ -58591,6 +58596,13 @@ function getRequiredStringInput(inputName) {
 }
 function getOptionalStringInput(inputName) {
     return getInput(inputName, undefined, false);
+}
+function getOptionalFilePath(inputName) {
+    const input = getOptionalStringInput(inputName);
+    if (!input) {
+        return;
+    }
+    return helpers.resolvePath(input);
 }
 function getOptionalBooleanInput(inputName) {
     const input = getOptionalStringInput(inputName);

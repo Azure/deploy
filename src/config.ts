@@ -70,8 +70,8 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
   const type = helpers.getRequiredEnumInput('type', ['deployment', 'deploymentStack']);
   const name = helpers.getOptionalStringInput('name');
   const location = helpers.getOptionalStringInput('location');
-  const templateFile = helpers.getOptionalStringInput('templateFile');
-  const parametersFile = helpers.getOptionalStringInput('parametersFile');
+  const templateFile = helpers.getOptionalFilePath('template-file');
+  const parametersFile = helpers.getOptionalFilePath('parameters-file');
   const description = helpers.getOptionalStringInput('description');
   const tags = helpers.getOptionalStringDictionaryInput('tags');
 
@@ -100,15 +100,15 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
         operation: helpers.getRequiredEnumInput('operation', ['create', 'validate', 'delete']),
         scope: parseDeploymentStackScope(),
         actionOnUnManage: {
-          resources: helpers.getRequiredEnumInput('actionOnUnManageResources', ['delete', 'detach']),
-          resourceGroups: helpers.getOptionalEnumInput('actionOnUnManageResourceGroups', ['delete', 'detach']),
-          managementGroups: helpers.getOptionalEnumInput('actionOnUnManageManagementGroups', ['delete', 'detach']),
+          resources: helpers.getRequiredEnumInput('action-on-unmanage-resources', ['delete', 'detach']),
+          resourceGroups: helpers.getOptionalEnumInput('action-on-unmanage-resourcegroups', ['delete', 'detach']),
+          managementGroups: helpers.getOptionalEnumInput('action-on-unmanage-managementgroups', ['delete', 'detach']),
         },
-        bypassStackOutOfSyncError: helpers.getOptionalBooleanInput('bypassStackOutOfSyncError'),
+        bypassStackOutOfSyncError: helpers.getOptionalBooleanInput('bypass-stack-out-of-sync-error'),
         denySettings: {
-          mode: helpers.getRequiredEnumInput('denySettingsMode', ['denyDelete', 'denyWriteAndDelete', 'none']),
-          excludedActions: helpers.getOptionalStringArrayInput('denySettingsExcludedActions'),
-          excludedPrincipals: helpers.getOptionalStringArrayInput('denySettingsExcludedPrincipals'),
+          mode: helpers.getRequiredEnumInput('deny-settings-mode', ['denyDelete', 'denyWriteAndDelete', 'none']),
+          excludedActions: helpers.getOptionalStringArrayInput('deny-settings-excluded-actions'),
+          excludedPrincipals: helpers.getOptionalStringArrayInput('deny-settings-excluded-principals'),
         },
       };
     }
@@ -116,8 +116,8 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
 }
 
 function parseDeploymentScope(): TenantScope | ManagementGroupScope | SubscriptionScope | ResourceGroupScope {
-  const type = helpers.getRequiredEnumInput('scopeType', ['tenant', 'managementGroup', 'subscription', 'resourceGroup']);
-  const tenantId = helpers.getOptionalStringInput('tenantId');
+  const type = helpers.getRequiredEnumInput('scope', ['tenant', 'managementGroup', 'subscription', 'resourceGroup']);
+  const tenantId = helpers.getOptionalStringInput('tenant-id');
 
   switch (type) {
     case 'tenant': {
@@ -127,7 +127,7 @@ function parseDeploymentScope(): TenantScope | ManagementGroupScope | Subscripti
       };
     }
     case 'managementGroup': {
-      const managementGroup = helpers.getRequiredStringInput('managementGroup');
+      const managementGroup = helpers.getRequiredStringInput('management-group-id');
       return {
         type,
         tenantId,
@@ -135,7 +135,7 @@ function parseDeploymentScope(): TenantScope | ManagementGroupScope | Subscripti
       };
     }
     case 'subscription': {
-      const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
+      const subscriptionId = helpers.getRequiredStringInput('subscription-id');
       return {
         type,
         tenantId,
@@ -143,8 +143,8 @@ function parseDeploymentScope(): TenantScope | ManagementGroupScope | Subscripti
       };
     }
     case 'resourceGroup': {
-      const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
-      const resourceGroup = helpers.getRequiredStringInput('resourceGroup');
+      const subscriptionId = helpers.getRequiredStringInput('subscription-id');
+      const resourceGroup = helpers.getRequiredStringInput('resource-group-name');
       return {
         type,
         tenantId,
@@ -156,12 +156,12 @@ function parseDeploymentScope(): TenantScope | ManagementGroupScope | Subscripti
 }
 
 function parseDeploymentStackScope(): ManagementGroupScope | SubscriptionScope | ResourceGroupScope {
-  const type = helpers.getRequiredEnumInput('scopeType', ['managementGroup', 'subscription', 'resourceGroup']);
-  const tenantId = helpers.getOptionalStringInput('tenantId');
+  const type = helpers.getRequiredEnumInput('scope', ['managementGroup', 'subscription', 'resourceGroup']);
+  const tenantId = helpers.getOptionalStringInput('tenant-id');
 
   switch (type) {
     case 'managementGroup': {
-      const managementGroup = helpers.getRequiredStringInput('managementGroup');
+      const managementGroup = helpers.getRequiredStringInput('management-group-id');
       return {
         type,
         tenantId,
@@ -169,7 +169,7 @@ function parseDeploymentStackScope(): ManagementGroupScope | SubscriptionScope |
       };
     }
     case 'subscription': {
-      const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
+      const subscriptionId = helpers.getRequiredStringInput('subscription-id');
       return {
         type,
         tenantId,
@@ -177,8 +177,8 @@ function parseDeploymentStackScope(): ManagementGroupScope | SubscriptionScope |
       };
     }
     case 'resourceGroup': {
-      const subscriptionId = helpers.getRequiredStringInput('subscriptionId');
-      const resourceGroup = helpers.getRequiredStringInput('resourceGroup');
+      const subscriptionId = helpers.getRequiredStringInput('subscription-id');
+      const resourceGroup = helpers.getRequiredStringInput('resource-group-name');
       return {
         type,
         tenantId,
