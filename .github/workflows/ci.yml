@@ -41,6 +41,7 @@ jobs:
         run: npm run test
 
   test-action:
+    if: false # disabled until we're ready to add live e2e testing
     name: GitHub Actions Test
     runs-on: ubuntu-latest
 
