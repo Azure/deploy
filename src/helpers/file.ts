@@ -1,116 +1,113 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import * as io from '@actions/io'
-import * as os from 'os'
-import * as fs from 'fs'
+import { tmpdir } from 'os'
+import * as fs from 'fs/promises'
 import * as path from 'path'
+import { Bicep } from 'bicep-node';
+import { FileConfig } from '../config'
 
-import * as helpers from '../helpers'
+export type ParsedFiles = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parametersContents?: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  templateContents?: any,
+  templateSpecId?: string,
+};
 
-export async function getTemplate(): Promise<Record<string, unknown>> {
-  const template = helpers.getInput('deployment-template', [], false)
+async function compileBicepParams(paramFilePath: string) {
+  const bicepPath = await Bicep.install(tmpdir());
 
-  if (fs.existsSync(template)) {
-    const ext = path.extname(template)
+  const result = await withBicep(bicepPath, bicep => bicep.compileParams({
+    path: paramFilePath,
+    parameterOverrides: {},
+  }));
 
-    if (ext === '.bicep') {
-      const filePath = await buildBicepFile(template)
-      const fileContent = fs.readFileSync(filePath).toString()
-
-      return JSON.parse(fileContent)
-    }
-
-    if (ext === '.json') {
-      const fileContent = fs.readFileSync(template).toString()
-
-      return JSON.parse(fileContent)
-    }
-
-    helpers.throwError('Unsupported file type.')
+  for (const diag of result.diagnostics) {
+    const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
+    if (diag.level === 'Error') core.error(message);
+    if (diag.level === 'Warning') core.warning(message);
+    if (diag.level === 'Info') core.info(message);
   }
+
+  if (!result.success) {
+    throw `Failed to compile Bicep parameters file: ${paramFilePath}`;
+  }
+
+  return { parameters: result.parameters, template: result.template, templateSpecId: result.templateSpecId };
+}
+
+async function compileBicep(templateFilePath: string) {
+  const bicepPath = await Bicep.install(tmpdir());
+
+  const result = await withBicep(bicepPath, bicep => bicep.compile({
+    path: templateFilePath,
+  }));
+
+  for (const diag of result.diagnostics) {
+    const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
+    if (diag.level === 'Error') core.error(message);
+    if (diag.level === 'Warning') core.warning(message);
+    if (diag.level === 'Info') core.info(message);
+  }
+
+  if (!result.success) {
+    throw `Failed to compile Bicep file: ${templateFilePath}`;
+  }
+
+  return { template: result.contents };
+}
+
+export async function getTemplateAndParameters(config: FileConfig) {
+  const { parametersFile, templateFile } = config;
+
+  if (parametersFile && path.extname(parametersFile).toLowerCase() === '.bicepparam') {
+    return parse(await compileBicepParams(parametersFile));
+  }
+
+  if (parametersFile && path.extname(parametersFile).toLowerCase() !== '.json') {
+    throw new Error(`Unsupported parameters file type: ${parametersFile}`);
+  }
+
+  const parameters = parametersFile ? await fs.readFile(parametersFile, 'utf8') : undefined;
+
+  if (templateFile && path.extname(templateFile).toLowerCase() === '.bicep') {
+    const { template } = await compileBicep(templateFile);
+
+    return parse({ template, parameters });
+  }
+
+  if (templateFile && path.extname(templateFile).toLowerCase() !== '.json') {
+    throw new Error(`Unsupported template file type: ${templateFile}`);
+  }
+
+  if (!templateFile) {
+    throw new Error('Template file is required');
+  }
+
+  const template = await fs.readFile(templateFile, 'utf8');
+
+  return parse({ template, parameters });
+}
+
+export function parse(input: { parameters?: string, template?: string, templateSpecId?: string }): ParsedFiles {
+  const { parameters, template, templateSpecId } = input;
+  const parametersContents = parameters ? JSON.parse(parameters) : undefined;
+  const templateContents = template ? JSON.parse(template) : undefined;
+
+  return { parametersContents, templateContents, templateSpecId };
+}
+
+async function withBicep<T>(bicepPath: string, action: (bicep: Bicep) => Promise<T>) {
+  const bicep = await Bicep.initialize(bicepPath);
 
   try {
-    return JSON.parse(template)
-  } catch {
-    helpers.throwError('Invalid template content')
+    return await action(bicep);
+  } finally {
+    bicep.dispose();
   }
 }
 
-export async function getParameters<T>(): Promise<T> {
-  const parameters = helpers.getInput('deployment-parameters', [], false)
-
-  if (fs.existsSync(parameters)) {
-    const ext = path.extname(parameters)
-
-    if (ext === '.bicepparam') {
-      const filePath = await buildBicepParametersFile(parameters)
-      const fileContent = fs.readFileSync(filePath)
-
-      return JSON.parse(fileContent.toString()) as T
-    }
-
-    if (ext === '.json') {
-      const fileContent = fs.readFileSync(parameters)
-
-      return JSON.parse(fileContent.toString()) as T
-    }
-  }
-
-  try {
-    return JSON.parse(parameters) as T
-  } catch {
-    helpers.throwError('Invalid parameters content')
-  }
-}
-
-async function buildBicepFile(filePath: string): Promise<string> {
-  const bicepPath = await io.which('bicep', true)
-  const outputPath = `${os.tmpdir()}/main.json`
-
-  const execOptions: exec.ExecOptions = {
-    listeners: {
-      stdout: (data: Buffer) => {
-        core.debug(data.toString().trim())
-      },
-      stderr: (data: Buffer) => {
-        core.error(data.toString().trim())
-      }
-    },
-    silent: true
-  }
-
-  await exec.exec(
-    bicepPath,
-    ['build', filePath, '--outfile', outputPath],
-    execOptions
-  )
-
-  return outputPath
-}
-
-async function buildBicepParametersFile(filePath: string): Promise<string> {
-  const bicepPath = await io.which('bicep', true)
-  const outputPath = `${os.tmpdir()}/main.params.json`
-
-  const execOptions: exec.ExecOptions = {
-    listeners: {
-      stdout: (data: Buffer) => {
-        core.debug(data.toString().trim())
-      },
-      stderr: (data: Buffer) => {
-        core.error(data.toString().trim())
-      }
-    },
-    silent: true
-  }
-
-  await exec.exec(
-    bicepPath,
-    ['build-params', filePath, '--outfile', outputPath],
-    execOptions
-  )
-
-  return outputPath
+export function resolvePath(fileName: string) {
+  return path.resolve(fileName);
 }
