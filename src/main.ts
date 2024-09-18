@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import * as core from '@actions/core'
+import * as core from "@actions/core";
 
-import { parseConfig } from './config';
-import { execute } from './handler'
-import { getTemplateAndParameters } from './helpers';
+import { parseConfig } from "./config";
+import { execute } from "./handler";
+import { getTemplateAndParameters } from "./helpers/file";
 
 /**
  * The main function for the action.
@@ -21,6 +21,6 @@ export async function run(): Promise<void> {
     await execute(config, files);
   } catch (error) {
     // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) core.setFailed(error.message);
   }
 }

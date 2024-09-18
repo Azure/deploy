@@ -57961,48 +57961,25 @@ module.exports.implForWrapper = function (wrapper) {
 /***/ }),
 
 /***/ 6373:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseConfig = parseConfig;
-const helpers = __importStar(__nccwpck_require__(3202));
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+const input_1 = __nccwpck_require__(5040);
 function parseConfig() {
-    const type = helpers.getRequiredEnumInput('type', ['deployment', 'deploymentStack']);
-    const name = helpers.getOptionalStringInput('name');
-    const location = helpers.getOptionalStringInput('location');
-    const templateFile = helpers.getOptionalFilePath('template-file');
-    const parametersFile = helpers.getOptionalFilePath('parameters-file');
-    const description = helpers.getOptionalStringInput('description');
-    const tags = helpers.getOptionalStringDictionaryInput('tags');
+    const type = (0, input_1.getRequiredEnumInput)("type", ["deployment", "deploymentStack"]);
+    const name = (0, input_1.getOptionalStringInput)("name");
+    const location = (0, input_1.getOptionalStringInput)("location");
+    const templateFile = (0, input_1.getOptionalFilePath)("template-file");
+    const parametersFile = (0, input_1.getOptionalFilePath)("parameters-file");
+    const description = (0, input_1.getOptionalStringInput)("description");
+    const tags = (0, input_1.getOptionalStringDictionaryInput)("tags");
     switch (type) {
-        case 'deployment': {
+        case "deployment": {
             return {
                 type,
                 name,
@@ -58010,11 +57987,15 @@ function parseConfig() {
                 templateFile,
                 parametersFile,
                 tags,
-                operation: helpers.getRequiredEnumInput('operation', ['create', 'validate', 'whatIf']),
+                operation: (0, input_1.getRequiredEnumInput)("operation", [
+                    "create",
+                    "validate",
+                    "whatIf",
+                ]),
                 scope: parseDeploymentScope(),
             };
         }
-        case 'deploymentStack': {
+        case "deploymentStack": {
             return {
                 type,
                 name,
@@ -58023,52 +58004,68 @@ function parseConfig() {
                 parametersFile,
                 description,
                 tags,
-                operation: helpers.getRequiredEnumInput('operation', ['create', 'validate', 'delete']),
+                operation: (0, input_1.getRequiredEnumInput)("operation", [
+                    "create",
+                    "validate",
+                    "delete",
+                ]),
                 scope: parseDeploymentStackScope(),
                 actionOnUnManage: {
-                    resources: helpers.getRequiredEnumInput('action-on-unmanage-resources', ['delete', 'detach']),
-                    resourceGroups: helpers.getOptionalEnumInput('action-on-unmanage-resourcegroups', ['delete', 'detach']),
-                    managementGroups: helpers.getOptionalEnumInput('action-on-unmanage-managementgroups', ['delete', 'detach']),
+                    resources: (0, input_1.getRequiredEnumInput)("action-on-unmanage-resources", [
+                        "delete",
+                        "detach",
+                    ]),
+                    resourceGroups: (0, input_1.getOptionalEnumInput)("action-on-unmanage-resourcegroups", ["delete", "detach"]),
+                    managementGroups: (0, input_1.getOptionalEnumInput)("action-on-unmanage-managementgroups", ["delete", "detach"]),
                 },
-                bypassStackOutOfSyncError: helpers.getOptionalBooleanInput('bypass-stack-out-of-sync-error'),
+                bypassStackOutOfSyncError: (0, input_1.getOptionalBooleanInput)("bypass-stack-out-of-sync-error"),
                 denySettings: {
-                    mode: helpers.getRequiredEnumInput('deny-settings-mode', ['denyDelete', 'denyWriteAndDelete', 'none']),
-                    excludedActions: helpers.getOptionalStringArrayInput('deny-settings-excluded-actions'),
-                    excludedPrincipals: helpers.getOptionalStringArrayInput('deny-settings-excluded-principals'),
+                    mode: (0, input_1.getRequiredEnumInput)("deny-settings-mode", [
+                        "denyDelete",
+                        "denyWriteAndDelete",
+                        "none",
+                    ]),
+                    excludedActions: (0, input_1.getOptionalStringArrayInput)("deny-settings-excluded-actions"),
+                    excludedPrincipals: (0, input_1.getOptionalStringArrayInput)("deny-settings-excluded-principals"),
                 },
             };
         }
     }
 }
 function parseDeploymentScope() {
-    const type = helpers.getRequiredEnumInput('scope', ['tenant', 'managementGroup', 'subscription', 'resourceGroup']);
-    const tenantId = helpers.getOptionalStringInput('tenant-id');
+    const type = (0, input_1.getRequiredEnumInput)("scope", [
+        "tenant",
+        "managementGroup",
+        "subscription",
+        "resourceGroup",
+    ]);
+    const tenantId = (0, input_1.getOptionalStringInput)("tenant-id");
     switch (type) {
-        case 'tenant': {
+        case "tenant": {
             return {
                 type,
                 tenantId,
             };
         }
-        case 'managementGroup': {
-            const managementGroup = helpers.getRequiredStringInput('management-group-id');
+        case "managementGroup": {
+            const managementGroup = (0, input_1.getRequiredStringInput)("management-group-id");
             return {
                 type,
                 tenantId,
                 managementGroup,
             };
         }
-        case 'subscription': {
-            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
+        case "subscription": {
+            const subscriptionId = (0, input_1.getRequiredStringInput)("subscription-id");
             return {
                 type,
                 tenantId,
                 subscriptionId,
             };
         }
-        case 'resourceGroup': {
-            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
-            const resourceGroup = helpers.getRequiredStringInput('resource-group-name');
+        case "resourceGroup": {
+            const subscriptionId = (0, input_1.getRequiredStringInput)("subscription-id");
+            const resourceGroup = (0, input_1.getRequiredStringInput)("resource-group-name");
             return {
                 type,
                 tenantId,
@@ -58079,28 +58076,32 @@ function parseDeploymentScope() {
     }
 }
 function parseDeploymentStackScope() {
-    const type = helpers.getRequiredEnumInput('scope', ['managementGroup', 'subscription', 'resourceGroup']);
-    const tenantId = helpers.getOptionalStringInput('tenant-id');
+    const type = (0, input_1.getRequiredEnumInput)("scope", [
+        "managementGroup",
+        "subscription",
+        "resourceGroup",
+    ]);
+    const tenantId = (0, input_1.getOptionalStringInput)("tenant-id");
     switch (type) {
-        case 'managementGroup': {
-            const managementGroup = helpers.getRequiredStringInput('management-group-id');
+        case "managementGroup": {
+            const managementGroup = (0, input_1.getRequiredStringInput)("management-group-id");
             return {
                 type,
                 tenantId,
                 managementGroup,
             };
         }
-        case 'subscription': {
-            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
+        case "subscription": {
+            const subscriptionId = (0, input_1.getRequiredStringInput)("subscription-id");
             return {
                 type,
                 tenantId,
                 subscriptionId,
             };
         }
-        case 'resourceGroup': {
-            const subscriptionId = helpers.getRequiredStringInput('subscription-id');
-            const resourceGroup = helpers.getRequiredStringInput('resource-group-name');
+        case "resourceGroup": {
+            const subscriptionId = (0, input_1.getRequiredStringInput)("subscription-id");
+            const resourceGroup = (0, input_1.getRequiredStringInput)("resource-group-name");
             return {
                 type,
                 tenantId,
@@ -58136,8 +58137,8 @@ const arm_resources_1 = __nccwpck_require__(4280);
 const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
 const identity_1 = __nccwpck_require__(3084);
 function createDeploymentClient(scope) {
-    if (scope.type == 'tenant' || scope.type == 'managementGroup') {
-        throw 'Subscription ID is required'; // TODO how to handle this properly?
+    if (scope.type == "tenant" || scope.type == "managementGroup") {
+        throw "Subscription ID is required"; // TODO how to handle this properly?
     }
     const { tenantId, subscriptionId } = scope;
     const credentials = new identity_1.DefaultAzureCredential({ tenantId });
@@ -58148,8 +58149,8 @@ function createDeploymentClient(scope) {
     });
 }
 function createStacksClient(scope) {
-    if (scope.type == 'tenant' || scope.type == 'managementGroup') {
-        throw 'Subscription ID is required'; // TODO how to handle this properly?
+    if (scope.type == "tenant" || scope.type == "managementGroup") {
+        throw "Subscription ID is required"; // TODO how to handle this properly?
     }
     const { tenantId, subscriptionId } = scope;
     const credentials = new identity_1.DefaultAzureCredential({ tenantId });
@@ -58162,11 +58163,11 @@ function createStacksClient(scope) {
 function execute(config, files) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (config.type) {
-            case 'deployment': {
+            case "deployment": {
                 yield executeDeployment(config, files);
                 break;
             }
-            case 'deploymentStack': {
+            case "deploymentStack": {
                 yield executeStack(config, files);
                 break;
             }
@@ -58178,94 +58179,96 @@ function executeDeployment(config, files) {
         var _a;
         const client = createDeploymentClient(config.scope);
         const { templateContents, templateSpecId, parametersContents } = files;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : 'deployment';
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : "deployment";
         const resource = {
             location: config.location,
             properties: {
-                mode: 'Incremental',
+                mode: "Incremental",
                 template: templateContents,
-                templateLink: templateSpecId ? {
-                    id: templateSpecId,
-                } : undefined,
-                parameters: parametersContents['parameters'],
+                templateLink: templateSpecId
+                    ? {
+                        id: templateSpecId,
+                    }
+                    : undefined,
+                parameters: parametersContents["parameters"],
                 expressionEvaluationOptions: {
-                    scope: 'inner'
+                    scope: "inner",
                 },
             },
             tags: config.tags,
         };
         switch (config.scope.type) {
-            case 'tenant': {
+            case "tenant": {
                 if (!config.location) {
-                    throw 'Location is required';
+                    throw "Location is required";
                 }
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deployments.beginValidateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'whatIf': {
+                    case "whatIf": {
                         yield client.deployments.beginWhatIfAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
                 }
                 break;
             }
-            case 'managementGroup': {
+            case "managementGroup": {
                 if (!config.location) {
-                    throw 'Location is required';
+                    throw "Location is required";
                 }
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deployments.beginValidateAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'whatIf': {
+                    case "whatIf": {
                         yield client.deployments.beginWhatIfAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
                 }
                 break;
             }
-            case 'subscription': {
+            case "subscription": {
                 if (!config.location) {
-                    throw 'Location is required';
+                    throw "Location is required";
                 }
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deployments.beginValidateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'whatIf': {
+                    case "whatIf": {
                         yield client.deployments.beginWhatIfAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
                 }
                 break;
             }
-            case 'resourceGroup': {
+            case "resourceGroup": {
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deployments.beginCreateOrUpdateAndWait(config.scope.resourceGroup, name, resource);
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deployments.beginValidateAndWait(config.scope.resourceGroup, name, resource);
                         break;
                     }
-                    case 'whatIf': {
+                    case "whatIf": {
                         yield client.deployments.beginWhatIfAndWait(config.scope.resourceGroup, name, resource);
                         break;
                     }
@@ -58280,14 +58283,16 @@ function executeStack(config, files) {
         var _a;
         const client = createStacksClient(config.scope);
         const { templateContents, templateSpecId, parametersContents } = files;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : 'deployment';
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : "deployment";
         const resource = {
             properties: {
                 template: templateContents,
-                templateLink: templateSpecId ? {
-                    id: templateSpecId,
-                } : undefined,
-                parameters: parametersContents['parameters'],
+                templateLink: templateSpecId
+                    ? {
+                        id: templateSpecId,
+                    }
+                    : undefined,
+                parameters: parametersContents["parameters"],
                 description: config.description,
                 actionOnUnmanage: config.actionOnUnManage,
                 denySettings: config.denySettings,
@@ -58296,57 +58301,57 @@ function executeStack(config, files) {
             tags: config.tags,
         };
         switch (config.scope.type) {
-            case 'managementGroup': {
+            case "managementGroup": {
                 if (!config.location) {
-                    throw 'Location is required';
+                    throw "Location is required";
                 }
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'delete': {
+                    case "delete": {
                         yield client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.scope.managementGroup, name);
                         break;
                     }
                 }
                 break;
             }
-            case 'subscription': {
+            case "subscription": {
                 if (!config.location) {
-                    throw 'Location is required';
+                    throw "Location is required";
                 }
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
                         break;
                     }
-                    case 'delete': {
+                    case "delete": {
                         yield client.deploymentStacks.beginDeleteAtSubscriptionAndWait(name);
                         break;
                     }
                 }
                 break;
             }
-            case 'resourceGroup': {
+            case "resourceGroup": {
                 switch (config.operation) {
-                    case 'create': {
+                    case "create": {
                         yield client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.scope.resourceGroup, name, resource);
                         break;
                     }
-                    case 'validate': {
+                    case "validate": {
                         yield client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.scope.resourceGroup, name, resource);
                         break;
                     }
-                    case 'delete': {
+                    case "delete": {
                         yield client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.scope.resourceGroup, name);
                         break;
                     }
@@ -58355,22 +58360,6 @@ function executeStack(config, files) {
             }
         }
     });
-}
-
-
-/***/ }),
-
-/***/ 9942:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.throwError = throwError;
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-function throwError(message) {
-    throw new Error(message);
 }
 
 
@@ -58420,45 +58409,49 @@ exports.resolvePath = resolvePath;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
-const os_1 = __nccwpck_require__(2037);
 const fs = __importStar(__nccwpck_require__(3292));
 const path = __importStar(__nccwpck_require__(1017));
 const bicep_node_1 = __nccwpck_require__(837);
+const os_1 = __nccwpck_require__(2037);
 function compileBicepParams(paramFilePath) {
     return __awaiter(this, void 0, void 0, function* () {
         const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
-        const result = yield withBicep(bicepPath, bicep => bicep.compileParams({
+        const result = yield withBicep(bicepPath, (bicep) => bicep.compileParams({
             path: paramFilePath,
             parameterOverrides: {},
         }));
         for (const diag of result.diagnostics) {
             const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
-            if (diag.level === 'Error')
+            if (diag.level === "Error")
                 core.error(message);
-            if (diag.level === 'Warning')
+            if (diag.level === "Warning")
                 core.warning(message);
-            if (diag.level === 'Info')
+            if (diag.level === "Info")
                 core.info(message);
         }
         if (!result.success) {
             throw `Failed to compile Bicep parameters file: ${paramFilePath}`;
         }
-        return { parameters: result.parameters, template: result.template, templateSpecId: result.templateSpecId };
+        return {
+            parameters: result.parameters,
+            template: result.template,
+            templateSpecId: result.templateSpecId,
+        };
     });
 }
 function compileBicep(templateFilePath) {
     return __awaiter(this, void 0, void 0, function* () {
         const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
-        const result = yield withBicep(bicepPath, bicep => bicep.compile({
+        const result = yield withBicep(bicepPath, (bicep) => bicep.compile({
             path: templateFilePath,
         }));
         for (const diag of result.diagnostics) {
             const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
-            if (diag.level === 'Error')
+            if (diag.level === "Error")
                 core.error(message);
-            if (diag.level === 'Warning')
+            if (diag.level === "Warning")
                 core.warning(message);
-            if (diag.level === 'Info')
+            if (diag.level === "Info")
                 core.info(message);
         }
         if (!result.success) {
@@ -58470,24 +58463,28 @@ function compileBicep(templateFilePath) {
 function getTemplateAndParameters(config) {
     return __awaiter(this, void 0, void 0, function* () {
         const { parametersFile, templateFile } = config;
-        if (parametersFile && path.extname(parametersFile).toLowerCase() === '.bicepparam') {
+        if (parametersFile &&
+            path.extname(parametersFile).toLowerCase() === ".bicepparam") {
             return parse(yield compileBicepParams(parametersFile));
         }
-        if (parametersFile && path.extname(parametersFile).toLowerCase() !== '.json') {
+        if (parametersFile &&
+            path.extname(parametersFile).toLowerCase() !== ".json") {
             throw new Error(`Unsupported parameters file type: ${parametersFile}`);
         }
-        const parameters = parametersFile ? yield fs.readFile(parametersFile, 'utf8') : undefined;
-        if (templateFile && path.extname(templateFile).toLowerCase() === '.bicep') {
+        const parameters = parametersFile
+            ? yield fs.readFile(parametersFile, "utf8")
+            : undefined;
+        if (templateFile && path.extname(templateFile).toLowerCase() === ".bicep") {
             const { template } = yield compileBicep(templateFile);
             return parse({ template, parameters });
         }
-        if (templateFile && path.extname(templateFile).toLowerCase() !== '.json') {
+        if (templateFile && path.extname(templateFile).toLowerCase() !== ".json") {
             throw new Error(`Unsupported template file type: ${templateFile}`);
         }
         if (!templateFile) {
-            throw new Error('Template file is required');
+            throw new Error("Template file is required");
         }
-        const template = yield fs.readFile(templateFile, 'utf8');
+        const template = yield fs.readFile(templateFile, "utf8");
         return parse({ template, parameters });
     });
 }
@@ -58511,35 +58508,6 @@ function withBicep(bicepPath, action) {
 function resolvePath(fileName) {
     return path.resolve(fileName);
 }
-
-
-/***/ }),
-
-/***/ 3202:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-__exportStar(__nccwpck_require__(8922), exports);
-__exportStar(__nccwpck_require__(9942), exports);
-__exportStar(__nccwpck_require__(5040), exports);
 
 
 /***/ }),
@@ -58584,7 +58552,7 @@ exports.getOptionalStringDictionaryInput = getOptionalStringDictionaryInput;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
-const helpers = __importStar(__nccwpck_require__(3202));
+const file_1 = __nccwpck_require__(8922);
 function getRequiredEnumInput(inputName, allowedValues) {
     return getInput(inputName, allowedValues, true);
 }
@@ -58602,21 +58570,21 @@ function getOptionalFilePath(inputName) {
     if (!input) {
         return;
     }
-    return helpers.resolvePath(input);
+    return (0, file_1.resolvePath)(input);
 }
 function getOptionalBooleanInput(inputName) {
     const input = getOptionalStringInput(inputName);
     if (!input) {
         return false;
     }
-    if (input.toLowerCase() === 'true') {
+    if (input.toLowerCase() === "true") {
         return true;
     }
-    else if (input.toLowerCase() === 'false') {
+    else if (input.toLowerCase() === "false") {
         return false;
     }
     else {
-        helpers.throwError(`Action input '${inputName}' must be a boolean value`);
+        throw new Error(`Action input '${inputName}' must be a boolean value`);
     }
 }
 function getOptionalStringArrayInput(inputName) {
@@ -58626,11 +58594,11 @@ function getOptionalStringArrayInput(inputName) {
     }
     const input = tryParseJson(inputString);
     if (!Array.isArray(input)) {
-        helpers.throwError(`Action input '${inputName}' must be a JSON string array`);
+        throw new Error(`Action input '${inputName}' must be a JSON string array`);
     }
-    input.forEach(val => {
-        if (typeof val !== 'string') {
-            helpers.throwError(`Action input '${inputName}' must be a JSON string array`);
+    input.forEach((val) => {
+        if (typeof val !== "string") {
+            throw new Error(`Action input '${inputName}' must be a JSON string array`);
         }
     });
     return input;
@@ -58641,12 +58609,12 @@ function getOptionalStringDictionaryInput(inputName) {
         return {};
     }
     const input = tryParseJson(inputString);
-    if (typeof input !== 'object') {
-        helpers.throwError(`Action input '${inputName}' must be a dictionary of string values`);
+    if (typeof input !== "object") {
+        throw new Error(`Action input '${inputName}' must be a dictionary of string values`);
     }
     Object.keys(input).forEach((key) => {
-        if (typeof input[key] !== 'string') {
-            helpers.throwError(`Action input '${inputName}' must be a dictionary of string values`);
+        if (typeof input[key] !== "string") {
+            throw new Error(`Action input '${inputName}' must be a dictionary of string values`);
         }
     });
     return input;
@@ -58655,14 +58623,14 @@ function getInput(inputName, allowedValues, throwOnMissing = true) {
     const inputValue = core.getInput(inputName);
     if (!inputValue) {
         if (throwOnMissing) {
-            helpers.throwError(`Action input '${inputName}' is required but not provided`);
+            throw new Error(`Action input '${inputName}' is required but not provided`);
         }
         else {
             return;
         }
     }
     if (allowedValues && !allowedValues.includes(inputValue)) {
-        helpers.throwError(`Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`);
+        throw new Error(`Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`);
     }
     return inputValue;
 }
@@ -58722,7 +58690,7 @@ exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const config_1 = __nccwpck_require__(6373);
 const handler_1 = __nccwpck_require__(8502);
-const helpers_1 = __nccwpck_require__(3202);
+const file_1 = __nccwpck_require__(8922);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -58732,7 +58700,7 @@ function run() {
         try {
             core.debug(`Starting action ...`);
             const config = (0, config_1.parseConfig)();
-            const files = yield (0, helpers_1.getTemplateAndParameters)(config);
+            const files = yield (0, file_1.getTemplateAndParameters)(config);
             yield (0, handler_1.execute)(config, files);
         }
         catch (error) {
