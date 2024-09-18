@@ -27,7 +27,7 @@ set -e
 #
 # Usage:
 #
-# script/release.sh
+# scripts/release.sh
 
 # Variables
 semver_tag_regex='v[0-9]+\.[0-9]+\.[0-9]+$'
