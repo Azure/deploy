@@ -60,7 +60,15 @@ inputs:
     required: false
     default: ''
 
-  action-on-unmanage:
+  action-on-unmanage-resources:
+    description: ''
+    required: false
+    default: ''
+  action-on-unmanage-resourcegroups:
+    description: ''
+    required: false
+    default: ''
+  action-on-unmanage-managementgroup:
     description: ''
     required: false
     default: ''
@@ -88,11 +96,6 @@ inputs:
   tags:
     description: ''
     required: false
-
-  await:
-    description: ''
-    required: false
-    default: 'true'
 
 runs:
   using: node20

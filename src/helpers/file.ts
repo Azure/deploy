@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import * as core from "@actions/core";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { Bicep } from "bicep-node";
+import { Bicep, CompileResponseDiagnostic } from "bicep-node";
 import { tmpdir } from "os";
 
 import { FileConfig } from "../config";
+import { logError, logInfo, logWarning } from "./logging";
 
 export type ParsedFiles = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,15 +23,10 @@ async function compileBicepParams(paramFilePath: string) {
     bicep.compileParams({
       path: paramFilePath,
       parameterOverrides: {},
-    })
+    }),
   );
 
-  for (const diag of result.diagnostics) {
-    const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
-    if (diag.level === "Error") core.error(message);
-    if (diag.level === "Warning") core.warning(message);
-    if (diag.level === "Info") core.info(message);
-  }
+  logDiagnostics(result.diagnostics);
 
   if (!result.success) {
     throw `Failed to compile Bicep parameters file: ${paramFilePath}`;
@@ -50,15 +45,10 @@ async function compileBicep(templateFilePath: string) {
   const result = await withBicep(bicepPath, (bicep) =>
     bicep.compile({
       path: templateFilePath,
-    })
+    }),
   );
 
-  for (const diag of result.diagnostics) {
-    const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
-    if (diag.level === "Error") core.error(message);
-    if (diag.level === "Warning") core.warning(message);
-    if (diag.level === "Info") core.info(message);
-  }
+  logDiagnostics(result.diagnostics);
 
   if (!result.success) {
     throw `Failed to compile Bicep file: ${templateFilePath}`;
@@ -121,11 +111,14 @@ export function parse(input: {
 
 async function withBicep<T>(
   bicepPath: string,
-  action: (bicep: Bicep) => Promise<T>
+  action: (bicep: Bicep) => Promise<T>,
 ) {
   const bicep = await Bicep.initialize(bicepPath);
 
   try {
+    const version = await bicep.version();
+    logInfo(`Installed Bicep version ${version} to ${bicepPath}`);
+
     return await action(bicep);
   } finally {
     bicep.dispose();
@@ -134,4 +127,13 @@ async function withBicep<T>(
 
 export function resolvePath(fileName: string) {
   return path.resolve(fileName);
+}
+
+function logDiagnostics(diagnostics: CompileResponseDiagnostic[]) {
+  for (const diag of diagnostics) {
+    const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
+    if (diag.level === "Error") logError(message);
+    if (diag.level === "Warning") logWarning(message);
+    if (diag.level === "Info") logInfo(message);
+  }
 }

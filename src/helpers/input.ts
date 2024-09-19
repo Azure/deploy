@@ -6,14 +6,14 @@ import { resolvePath } from "./file";
 
 export function getRequiredEnumInput<TEnum extends string>(
   inputName: string,
-  allowedValues: TEnum[]
+  allowedValues: TEnum[],
 ): TEnum {
   return getInput(inputName, allowedValues, true) as TEnum;
 }
 
 export function getOptionalEnumInput<TEnum extends string>(
   inputName: string,
-  allowedValues: TEnum[]
+  allowedValues: TEnum[],
 ): TEnum | undefined {
   return getInput(inputName, allowedValues, false) as TEnum | undefined;
 }
@@ -64,7 +64,7 @@ export function getOptionalStringArrayInput(inputName: string): string[] {
   input.forEach((val) => {
     if (typeof val !== "string") {
       throw new Error(
-        `Action input '${inputName}' must be a JSON string array`
+        `Action input '${inputName}' must be a JSON string array`,
       );
     }
   });
@@ -73,7 +73,7 @@ export function getOptionalStringArrayInput(inputName: string): string[] {
 }
 
 export function getOptionalStringDictionaryInput(
-  inputName: string
+  inputName: string,
 ): Record<string, string> {
   const inputString = getOptionalStringInput(inputName);
   if (!inputString) {
@@ -83,14 +83,14 @@ export function getOptionalStringDictionaryInput(
   const input = tryParseJson(inputString);
   if (typeof input !== "object") {
     throw new Error(
-      `Action input '${inputName}' must be a dictionary of string values`
+      `Action input '${inputName}' must be a dictionary of string values`,
     );
   }
 
   Object.keys(input).forEach((key) => {
     if (typeof input[key] !== "string") {
       throw new Error(
-        `Action input '${inputName}' must be a dictionary of string values`
+        `Action input '${inputName}' must be a dictionary of string values`,
       );
     }
   });
@@ -101,13 +101,13 @@ export function getOptionalStringDictionaryInput(
 function getInput(
   inputName: string,
   allowedValues?: string[],
-  throwOnMissing = true
+  throwOnMissing = true,
 ): string | undefined {
   const inputValue = core.getInput(inputName);
   if (!inputValue) {
     if (throwOnMissing) {
       throw new Error(
-        `Action input '${inputName}' is required but not provided`
+        `Action input '${inputName}' is required but not provided`,
       );
     } else {
       return;
@@ -116,7 +116,7 @@ function getInput(
 
   if (allowedValues && !allowedValues.includes(inputValue)) {
     throw new Error(
-      `Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`
+      `Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`,
     );
   }
 

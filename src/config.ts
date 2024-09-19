@@ -126,15 +126,15 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
           ]),
           resourceGroups: getOptionalEnumInput(
             "action-on-unmanage-resourcegroups",
-            ["delete", "detach"]
+            ["delete", "detach"],
           ),
           managementGroups: getOptionalEnumInput(
             "action-on-unmanage-managementgroups",
-            ["delete", "detach"]
+            ["delete", "detach"],
           ),
         },
         bypassStackOutOfSyncError: getOptionalBooleanInput(
-          "bypass-stack-out-of-sync-error"
+          "bypass-stack-out-of-sync-error",
         ),
         denySettings: {
           mode: getRequiredEnumInput("deny-settings-mode", [
@@ -143,10 +143,10 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
             "none",
           ]),
           excludedActions: getOptionalStringArrayInput(
-            "deny-settings-excluded-actions"
+            "deny-settings-excluded-actions",
           ),
           excludedPrincipals: getOptionalStringArrayInput(
-            "deny-settings-excluded-principals"
+            "deny-settings-excluded-principals",
           ),
         },
       };

@@ -30,6 +30,7 @@ jest.mock("bicep-node", () => ({
       compileParams: jest
         .fn()
         .mockImplementation((p) => compileBicepParamsMock(p)),
+      version: jest.fn().mockReturnValue("1.2.3"),
       dispose: jest.fn(),
     }),
   },
@@ -64,12 +65,12 @@ describe("file parsing", () => {
     expect(templateContents["$schema"]).toEqual(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     );
-    expect(templateContents["parameters"]["foo"]).toBeDefined();
+    expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
     expect(parametersContents["$schema"]).toEqual(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
     );
-    expect(parametersContents["parameters"]["foo"]).toBeDefined();
+    expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
   });
 
   it("compiles Bicepparam files", async () => {
@@ -97,12 +98,12 @@ describe("file parsing", () => {
     expect(templateContents["$schema"]).toEqual(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     );
-    expect(templateContents["parameters"]["foo"]).toBeDefined();
+    expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
     expect(parametersContents["$schema"]).toEqual(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
     );
-    expect(parametersContents["parameters"]["foo"]).toBeDefined();
+    expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
   });
 
   it("compiles Bicep files", async () => {
@@ -135,12 +136,12 @@ describe("file parsing", () => {
     expect(templateContents["$schema"]).toEqual(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
     );
-    expect(templateContents["parameters"]["foo"]).toBeDefined();
+    expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
     expect(parametersContents["$schema"]).toEqual(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
     );
-    expect(parametersContents["parameters"]["foo"]).toBeDefined();
+    expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
   });
 
   it("blocks unexpected parameter file extensions", async () => {

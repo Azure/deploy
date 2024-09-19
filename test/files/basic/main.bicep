@@ -1,3 +1,7 @@
-param foo string
+param stringParam string
+param intParam int
+param objectParam object
 
-output foo string = foo
+output stringOutput string = stringParam
+output intOutput int = intParam
+output objectOutput object = objectParam
