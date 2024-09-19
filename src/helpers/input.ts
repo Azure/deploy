@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import * as core from '@actions/core'
-import * as helpers from '../helpers'
+import * as core from "@actions/core";
+
+import { resolvePath } from "./file";
 
 export function getRequiredEnumInput<TEnum extends string>(
   inputName: string,
@@ -31,7 +32,7 @@ export function getOptionalFilePath(inputName: string): string | undefined {
     return;
   }
 
-  return helpers.resolvePath(input);
+  return resolvePath(input);
 }
 
 export function getOptionalBooleanInput(inputName: string): boolean {
@@ -40,12 +41,12 @@ export function getOptionalBooleanInput(inputName: string): boolean {
     return false;
   }
 
-  if (input.toLowerCase() === 'true') {
+  if (input.toLowerCase() === "true") {
     return true;
-  } else if (input.toLowerCase() === 'false') {
+  } else if (input.toLowerCase() === "false") {
     return false;
   } else {
-    helpers.throwError(`Action input '${inputName}' must be a boolean value`);
+    throw new Error(`Action input '${inputName}' must be a boolean value`);
   }
 }
 
@@ -57,35 +58,43 @@ export function getOptionalStringArrayInput(inputName: string): string[] {
 
   const input = tryParseJson(inputString);
   if (!Array.isArray(input)) {
-    helpers.throwError(`Action input '${inputName}' must be a JSON string array`);
+    throw new Error(`Action input '${inputName}' must be a JSON string array`);
   }
 
-  input.forEach(val => {
-    if (typeof val !== 'string') {
-      helpers.throwError(`Action input '${inputName}' must be a JSON string array`);
+  input.forEach((val) => {
+    if (typeof val !== "string") {
+      throw new Error(
+        `Action input '${inputName}' must be a JSON string array`
+      );
     }
   });
 
   return input;
 }
 
-export function getOptionalStringDictionaryInput(inputName: string): Record<string, string> {
+export function getOptionalStringDictionaryInput(
+  inputName: string
+): Record<string, string> {
   const inputString = getOptionalStringInput(inputName);
   if (!inputString) {
     return {};
   }
 
   const input = tryParseJson(inputString);
-  if (typeof input !== 'object') {
-    helpers.throwError(`Action input '${inputName}' must be a dictionary of string values`);
+  if (typeof input !== "object") {
+    throw new Error(
+      `Action input '${inputName}' must be a dictionary of string values`
+    );
   }
 
   Object.keys(input).forEach((key) => {
-    if (typeof input[key] !== 'string') {
-      helpers.throwError(`Action input '${inputName}' must be a dictionary of string values`);
+    if (typeof input[key] !== "string") {
+      throw new Error(
+        `Action input '${inputName}' must be a dictionary of string values`
+      );
     }
   });
-  
+
   return input;
 }
 
@@ -94,19 +103,21 @@ function getInput(
   allowedValues?: string[],
   throwOnMissing = true
 ): string | undefined {
-  const inputValue = core.getInput(inputName)
+  const inputValue = core.getInput(inputName);
   if (!inputValue) {
     if (throwOnMissing) {
-      helpers.throwError(`Action input '${inputName}' is required but not provided`)
+      throw new Error(
+        `Action input '${inputName}' is required but not provided`
+      );
     } else {
       return;
     }
   }
 
   if (allowedValues && !allowedValues.includes(inputValue)) {
-    helpers.throwError(
+    throw new Error(
       `Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`
-    )
+    );
   }
 
   return inputValue;
