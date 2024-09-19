@@ -58133,51 +58133,55 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.execute = execute;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-const arm_resources_1 = __nccwpck_require__(4280);
-const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
-const identity_1 = __nccwpck_require__(3084);
-function createDeploymentClient(scope) {
+const core_1 = __nccwpck_require__(2186);
+const core_rest_pipeline_1 = __nccwpck_require__(9146);
+const azure_1 = __nccwpck_require__(240);
+const logging_1 = __nccwpck_require__(6679);
+function getDeploymentClient(scope) {
     if (scope.type == "tenant" || scope.type == "managementGroup") {
         throw "Subscription ID is required"; // TODO how to handle this properly?
     }
     const { tenantId, subscriptionId } = scope;
-    const credentials = new identity_1.DefaultAzureCredential({ tenantId });
-    return new arm_resources_1.ResourceManagementClient(credentials, subscriptionId, {
-        userAgentOptions: {
-            userAgentPrefix: "gha-azure-deploy",
-        },
-    });
+    return (0, azure_1.createDeploymentClient)(subscriptionId, tenantId);
 }
-function createStacksClient(scope) {
+function getStacksClient(scope) {
     if (scope.type == "tenant" || scope.type == "managementGroup") {
         throw "Subscription ID is required"; // TODO how to handle this properly?
     }
     const { tenantId, subscriptionId } = scope;
-    const credentials = new identity_1.DefaultAzureCredential({ tenantId });
-    return new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credentials, subscriptionId, {
-        userAgentOptions: {
-            userAgentPrefix: "gha-azure-deploy",
-        },
-    });
+    return (0, azure_1.createStacksClient)(subscriptionId, tenantId);
 }
 function execute(config, files) {
     return __awaiter(this, void 0, void 0, function* () {
-        switch (config.type) {
-            case "deployment": {
-                yield executeDeployment(config, files);
-                break;
+        var _a;
+        try {
+            switch (config.type) {
+                case "deployment": {
+                    yield executeDeployment(config, files);
+                    break;
+                }
+                case "deploymentStack": {
+                    yield executeStack(config, files);
+                    break;
+                }
             }
-            case "deploymentStack": {
-                yield executeStack(config, files);
-                break;
+        }
+        catch (error) {
+            if (error instanceof core_rest_pipeline_1.RestError && ((_a = error.response) === null || _a === void 0 ? void 0 : _a.bodyAsText)) {
+                const correlationId = error.response.headers.get("x-ms-correlation-request-id");
+                (0, logging_1.logError)(`Request failed. CorrelationId: ${correlationId}`);
+                const responseBody = JSON.parse(error.response.bodyAsText);
+                (0, logging_1.logError)(JSON.stringify(responseBody, null, 2));
             }
+            (0, core_1.setFailed)("Operation failed");
+            throw error;
         }
     });
 }
 function executeDeployment(config, files) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const client = createDeploymentClient(config.scope);
+        var _a, _b, _c, _d, _e;
+        const client = getDeploymentClient(config.scope);
         const { templateContents, templateSpecId, parametersContents } = files;
         const name = (_a = config.name) !== null && _a !== void 0 ? _a : "deployment";
         const resource = {
@@ -58204,7 +58208,8 @@ function executeDeployment(config, files) {
                 }
                 switch (config.operation) {
                     case "create": {
-                        yield client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        const result = yield client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        setDeploymentOutputs((_b = result.properties) === null || _b === void 0 ? void 0 : _b.outputs);
                         break;
                     }
                     case "validate": {
@@ -58224,7 +58229,8 @@ function executeDeployment(config, files) {
                 }
                 switch (config.operation) {
                     case "create": {
-                        yield client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        const result = yield client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        setDeploymentOutputs((_c = result.properties) === null || _c === void 0 ? void 0 : _c.outputs);
                         break;
                     }
                     case "validate": {
@@ -58244,7 +58250,8 @@ function executeDeployment(config, files) {
                 }
                 switch (config.operation) {
                     case "create": {
-                        yield client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        const result = yield client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        setDeploymentOutputs((_d = result.properties) === null || _d === void 0 ? void 0 : _d.outputs);
                         break;
                     }
                     case "validate": {
@@ -58261,7 +58268,8 @@ function executeDeployment(config, files) {
             case "resourceGroup": {
                 switch (config.operation) {
                     case "create": {
-                        yield client.deployments.beginCreateOrUpdateAndWait(config.scope.resourceGroup, name, resource);
+                        const result = yield client.deployments.beginCreateOrUpdateAndWait(config.scope.resourceGroup, name, resource);
+                        setDeploymentOutputs((_e = result.properties) === null || _e === void 0 ? void 0 : _e.outputs);
                         break;
                     }
                     case "validate": {
@@ -58280,8 +58288,8 @@ function executeDeployment(config, files) {
 }
 function executeStack(config, files) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const client = createStacksClient(config.scope);
+        var _a, _b, _c, _d;
+        const client = getStacksClient(config.scope);
         const { templateContents, templateSpecId, parametersContents } = files;
         const name = (_a = config.name) !== null && _a !== void 0 ? _a : "deployment";
         const resource = {
@@ -58307,7 +58315,8 @@ function executeStack(config, files) {
                 }
                 switch (config.operation) {
                     case "create": {
-                        yield client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        const result = yield client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        setDeploymentOutputs((_b = result.properties) === null || _b === void 0 ? void 0 : _b.outputs);
                         break;
                     }
                     case "validate": {
@@ -58327,7 +58336,8 @@ function executeStack(config, files) {
                 }
                 switch (config.operation) {
                     case "create": {
-                        yield client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        const result = yield client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
+                        setDeploymentOutputs((_c = result.properties) === null || _c === void 0 ? void 0 : _c.outputs);
                         break;
                     }
                     case "validate": {
@@ -58344,7 +58354,8 @@ function executeStack(config, files) {
             case "resourceGroup": {
                 switch (config.operation) {
                     case "create": {
-                        yield client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.scope.resourceGroup, name, resource);
+                        const result = yield client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.scope.resourceGroup, name, resource);
+                        setDeploymentOutputs((_d = result.properties) === null || _d === void 0 ? void 0 : _d.outputs);
                         break;
                     }
                     case "validate": {
@@ -58359,6 +58370,48 @@ function executeStack(config, files) {
                 break;
             }
         }
+    });
+}
+function setDeploymentOutputs(outputs) {
+    if (!outputs) {
+        return;
+    }
+    for (const key of Object.keys(outputs)) {
+        const output = outputs[key];
+        (0, core_1.setOutput)(key, output.value);
+    }
+}
+
+
+/***/ }),
+
+/***/ 240:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createDeploymentClient = createDeploymentClient;
+exports.createStacksClient = createStacksClient;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+const arm_resources_1 = __nccwpck_require__(4280);
+const arm_resourcesdeploymentstacks_1 = __nccwpck_require__(3704);
+const identity_1 = __nccwpck_require__(3084);
+function createDeploymentClient(subscriptionId, tenantId) {
+    const credentials = new identity_1.DefaultAzureCredential({ tenantId });
+    return new arm_resources_1.ResourceManagementClient(credentials, subscriptionId, {
+        userAgentOptions: {
+            userAgentPrefix: "gha-azure-deploy",
+        },
+    });
+}
+function createStacksClient(subscriptionId, tenantId) {
+    const credentials = new identity_1.DefaultAzureCredential({ tenantId });
+    return new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credentials, subscriptionId, {
+        userAgentOptions: {
+            userAgentPrefix: "gha-azure-deploy",
+        },
     });
 }
 
@@ -58408,11 +58461,11 @@ exports.parse = parse;
 exports.resolvePath = resolvePath;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(3292));
 const path = __importStar(__nccwpck_require__(1017));
 const bicep_node_1 = __nccwpck_require__(837);
 const os_1 = __nccwpck_require__(2037);
+const logging_1 = __nccwpck_require__(6679);
 function compileBicepParams(paramFilePath) {
     return __awaiter(this, void 0, void 0, function* () {
         const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
@@ -58420,15 +58473,7 @@ function compileBicepParams(paramFilePath) {
             path: paramFilePath,
             parameterOverrides: {},
         }));
-        for (const diag of result.diagnostics) {
-            const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
-            if (diag.level === "Error")
-                core.error(message);
-            if (diag.level === "Warning")
-                core.warning(message);
-            if (diag.level === "Info")
-                core.info(message);
-        }
+        logDiagnostics(result.diagnostics);
         if (!result.success) {
             throw `Failed to compile Bicep parameters file: ${paramFilePath}`;
         }
@@ -58445,15 +58490,7 @@ function compileBicep(templateFilePath) {
         const result = yield withBicep(bicepPath, (bicep) => bicep.compile({
             path: templateFilePath,
         }));
-        for (const diag of result.diagnostics) {
-            const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
-            if (diag.level === "Error")
-                core.error(message);
-            if (diag.level === "Warning")
-                core.warning(message);
-            if (diag.level === "Info")
-                core.info(message);
-        }
+        logDiagnostics(result.diagnostics);
         if (!result.success) {
             throw `Failed to compile Bicep file: ${templateFilePath}`;
         }
@@ -58498,6 +58535,8 @@ function withBicep(bicepPath, action) {
     return __awaiter(this, void 0, void 0, function* () {
         const bicep = yield bicep_node_1.Bicep.initialize(bicepPath);
         try {
+            const version = yield bicep.version();
+            (0, logging_1.logInfo)(`Installed Bicep version ${version} to ${bicepPath}`);
             return yield action(bicep);
         }
         finally {
@@ -58507,6 +58546,17 @@ function withBicep(bicepPath, action) {
 }
 function resolvePath(fileName) {
     return path.resolve(fileName);
+}
+function logDiagnostics(diagnostics) {
+    for (const diag of diagnostics) {
+        const message = `${diag.source}(${diag.range.start.line + 1},${diag.range.start.char + 1}) : ${diag.level} ${diag.code}: ${diag.message}`;
+        if (diag.level === "Error")
+            (0, logging_1.logError)(message);
+        if (diag.level === "Warning")
+            (0, logging_1.logWarning)(message);
+        if (diag.level === "Info")
+            (0, logging_1.logInfo)(message);
+    }
 }
 
 
@@ -58646,6 +58696,66 @@ function tryParseJson(value) {
 
 /***/ }),
 
+/***/ 6679:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.logError = exports.logWarning = exports.logInfo = exports.Color = void 0;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+const core = __importStar(__nccwpck_require__(2186));
+var Color;
+(function (Color) {
+    Color["Red"] = "\u001B[31m";
+    Color["Green"] = "\u001B[32m";
+    Color["Yellow"] = "\u001B[33m";
+    Color["Blue"] = "\u001B[34m";
+    Color["Magenta"] = "\u001B[35m";
+    Color["Cyan"] = "\u001B[36m";
+    Color["White"] = "\u001B[37m";
+    Color["Reset"] = "\u001B[0m";
+})(Color || (exports.Color = Color = {}));
+function colorize(message, color) {
+    return message
+        .split("\n")
+        .map((line) => `${color}${line}${Color.Reset}`)
+        .join("\n");
+}
+const logInfo = (message) => core.info(colorize(message, Color.Blue));
+exports.logInfo = logInfo;
+const logWarning = (message) => core.warning(colorize(message, Color.Yellow));
+exports.logWarning = logWarning;
+const logError = (message) => core.error(colorize(message, Color.Red));
+exports.logError = logError;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -58691,6 +58801,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const config_1 = __nccwpck_require__(6373);
 const handler_1 = __nccwpck_require__(8502);
 const file_1 = __nccwpck_require__(8922);
+const logging_1 = __nccwpck_require__(6679);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -58698,8 +58809,8 @@ const file_1 = __nccwpck_require__(8922);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            core.debug(`Starting action ...`);
             const config = (0, config_1.parseConfig)();
+            (0, logging_1.logInfo)(`Action config: ${JSON.stringify(config, null, 2)}`);
             const files = yield (0, file_1.getTemplateAndParameters)(config);
             yield (0, handler_1.execute)(config, files);
         }

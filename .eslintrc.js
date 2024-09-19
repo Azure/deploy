@@ -9,7 +9,7 @@ module.exports = {
     project: './tsconfig.json',
   },
   plugins: ["header"],
-  extends: ["eslint:recommended"],
+  extends: ["eslint:recommended", "plugin:prettier/recommended"],
   ignorePatterns: ["/out/**/*"],
   rules: {
     "header/header": [

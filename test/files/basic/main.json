@@ -4,20 +4,34 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "3518089695549573947"
+      "version": "0.30.3.12046",
+      "templateHash": "12629837844740609201"
     }
   },
   "parameters": {
-    "foo": {
+    "stringParam": {
       "type": "string"
+    },
+    "intParam": {
+      "type": "int"
+    },
+    "objectParam": {
+      "type": "object"
     }
   },
   "resources": [],
   "outputs": {
-    "foo": {
+    "stringOutput": {
       "type": "string",
-      "value": "[parameters('foo')]"
+      "value": "[parameters('stringParam')]"
+    },
+    "intOutput": {
+      "type": "int",
+      "value": "[parameters('intParam')]"
+    },
+    "objectOutput": {
+      "type": "object",
+      "value": "[parameters('objectParam')]"
     }
   }
 }
