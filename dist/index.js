@@ -57993,6 +57993,17 @@ function parseConfig() {
                     "whatIf",
                 ]),
                 scope: parseDeploymentScope(),
+                whatIf: {
+                    excludeChangeTypes: (0, input_1.getOptionalEnumArrayInput)("what-if-exclude-change-types", [
+                        "create",
+                        "delete",
+                        "modify",
+                        "deploy",
+                        "noChange",
+                        "ignore",
+                        "unsupported",
+                    ]),
+                },
             };
         }
         case "deploymentStack": {
@@ -58137,6 +58148,8 @@ const core_1 = __nccwpck_require__(2186);
 const core_rest_pipeline_1 = __nccwpck_require__(9146);
 const azure_1 = __nccwpck_require__(240);
 const logging_1 = __nccwpck_require__(6679);
+const whatif_1 = __nccwpck_require__(2852);
+const defaultName = "azure-deploy";
 function getDeploymentClient(scope) {
     if (scope.type == "tenant" || scope.type == "managementGroup") {
         throw "Subscription ID is required"; // TODO how to handle this properly?
@@ -58157,11 +58170,59 @@ function execute(config, files) {
         try {
             switch (config.type) {
                 case "deployment": {
-                    yield executeDeployment(config, files);
+                    switch (config.operation) {
+                        case "create": {
+                            yield tryWithErrorHandling(() => __awaiter(this, void 0, void 0, function* () {
+                                var _a;
+                                const result = yield deploymentCreate(config, files);
+                                setCreateOutputs((_a = result === null || result === void 0 ? void 0 : result.properties) === null || _a === void 0 ? void 0 : _a.outputs);
+                            }), error => {
+                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                                (0, core_1.setFailed)("Create failed");
+                            });
+                            break;
+                        }
+                        case "validate": {
+                            yield tryWithErrorHandling(() => deploymentValidate(config, files), error => {
+                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                                (0, core_1.setFailed)("Validation failed");
+                            });
+                            break;
+                        }
+                        case "whatIf": {
+                            const result = yield deploymentWhatIf(config, files);
+                            const formatted = (0, whatif_1.formatWhatIfOperationResult)(result);
+                            (0, logging_1.logInfoRaw)(formatted);
+                            break;
+                        }
+                    }
                     break;
                 }
                 case "deploymentStack": {
-                    yield executeStack(config, files);
+                    switch (config.operation) {
+                        case "create": {
+                            yield tryWithErrorHandling(() => __awaiter(this, void 0, void 0, function* () {
+                                var _a;
+                                const result = yield stackCreate(config, files);
+                                setCreateOutputs((_a = result === null || result === void 0 ? void 0 : result.properties) === null || _a === void 0 ? void 0 : _a.outputs);
+                            }), error => {
+                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                                (0, core_1.setFailed)("Create failed");
+                            });
+                            break;
+                        }
+                        case "validate": {
+                            yield tryWithErrorHandling(() => stackValidate(config, files), error => {
+                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                                (0, core_1.setFailed)("Validation failed");
+                            });
+                            break;
+                        }
+                        case "delete": {
+                            yield stackDelete(config);
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -58178,201 +58239,7 @@ function execute(config, files) {
         }
     });
 }
-function executeDeployment(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e;
-        const client = getDeploymentClient(config.scope);
-        const { templateContents, templateSpecId, parametersContents } = files;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : "deployment";
-        const resource = {
-            location: config.location,
-            properties: {
-                mode: "Incremental",
-                template: templateContents,
-                templateLink: templateSpecId
-                    ? {
-                        id: templateSpecId,
-                    }
-                    : undefined,
-                parameters: parametersContents["parameters"],
-                expressionEvaluationOptions: {
-                    scope: "inner",
-                },
-            },
-            tags: config.tags,
-        };
-        switch (config.scope.type) {
-            case "tenant": {
-                if (!config.location) {
-                    throw "Location is required";
-                }
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        setDeploymentOutputs((_b = result.properties) === null || _b === void 0 ? void 0 : _b.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deployments.beginValidateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                    case "whatIf": {
-                        yield client.deployments.beginWhatIfAtTenantScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                }
-                break;
-            }
-            case "managementGroup": {
-                if (!config.location) {
-                    throw "Location is required";
-                }
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        setDeploymentOutputs((_c = result.properties) === null || _c === void 0 ? void 0 : _c.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deployments.beginValidateAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                    case "whatIf": {
-                        yield client.deployments.beginWhatIfAtManagementGroupScopeAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                }
-                break;
-            }
-            case "subscription": {
-                if (!config.location) {
-                    throw "Location is required";
-                }
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        setDeploymentOutputs((_d = result.properties) === null || _d === void 0 ? void 0 : _d.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deployments.beginValidateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                    case "whatIf": {
-                        yield client.deployments.beginWhatIfAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                }
-                break;
-            }
-            case "resourceGroup": {
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deployments.beginCreateOrUpdateAndWait(config.scope.resourceGroup, name, resource);
-                        setDeploymentOutputs((_e = result.properties) === null || _e === void 0 ? void 0 : _e.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deployments.beginValidateAndWait(config.scope.resourceGroup, name, resource);
-                        break;
-                    }
-                    case "whatIf": {
-                        yield client.deployments.beginWhatIfAndWait(config.scope.resourceGroup, name, resource);
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    });
-}
-function executeStack(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d;
-        const client = getStacksClient(config.scope);
-        const { templateContents, templateSpecId, parametersContents } = files;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : "deployment";
-        const resource = {
-            properties: {
-                template: templateContents,
-                templateLink: templateSpecId
-                    ? {
-                        id: templateSpecId,
-                    }
-                    : undefined,
-                parameters: parametersContents["parameters"],
-                description: config.description,
-                actionOnUnmanage: config.actionOnUnManage,
-                denySettings: config.denySettings,
-                bypassStackOutOfSyncError: config.bypassStackOutOfSyncError,
-            },
-            tags: config.tags,
-        };
-        switch (config.scope.type) {
-            case "managementGroup": {
-                if (!config.location) {
-                    throw "Location is required";
-                }
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        setDeploymentOutputs((_b = result.properties) === null || _b === void 0 ? void 0 : _b.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(config.scope.managementGroup, name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                    case "delete": {
-                        yield client.deploymentStacks.beginDeleteAtManagementGroupAndWait(config.scope.managementGroup, name);
-                        break;
-                    }
-                }
-                break;
-            }
-            case "subscription": {
-                if (!config.location) {
-                    throw "Location is required";
-                }
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        setDeploymentOutputs((_c = result.properties) === null || _c === void 0 ? void 0 : _c.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(name, Object.assign(Object.assign({}, resource), { location: config.location }));
-                        break;
-                    }
-                    case "delete": {
-                        yield client.deploymentStacks.beginDeleteAtSubscriptionAndWait(name);
-                        break;
-                    }
-                }
-                break;
-            }
-            case "resourceGroup": {
-                switch (config.operation) {
-                    case "create": {
-                        const result = yield client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(config.scope.resourceGroup, name, resource);
-                        setDeploymentOutputs((_d = result.properties) === null || _d === void 0 ? void 0 : _d.outputs);
-                        break;
-                    }
-                    case "validate": {
-                        yield client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(config.scope.resourceGroup, name, resource);
-                        break;
-                    }
-                    case "delete": {
-                        yield client.deploymentStacks.beginDeleteAtResourceGroupAndWait(config.scope.resourceGroup, name);
-                        break;
-                    }
-                }
-                break;
-            }
-        }
-    });
-}
-function setDeploymentOutputs(outputs) {
+function setCreateOutputs(outputs) {
     if (!outputs) {
         return;
     }
@@ -58380,6 +58247,180 @@ function setDeploymentOutputs(outputs) {
         const output = outputs[key];
         (0, core_1.setOutput)(key, output.value);
     }
+}
+function deploymentCreate(config, files) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
+        const scope = config.scope;
+        const client = getDeploymentClient(scope);
+        const deployment = getDeployment(config, files);
+        switch (scope.type) {
+            case "resourceGroup":
+                return yield client.deployments.beginCreateOrUpdateAndWait(scope.resourceGroup, name, deployment);
+            case "subscription":
+                return yield client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+            case "managementGroup":
+                return yield client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+            case "tenant":
+                yield client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+        }
+    });
+}
+function deploymentValidate(config, files) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
+        const scope = config.scope;
+        const client = getDeploymentClient(scope);
+        const deployment = getDeployment(config, files);
+        switch (scope.type) {
+            case "resourceGroup":
+                return yield client.deployments.beginValidateAndWait(scope.resourceGroup, name, deployment);
+            case "subscription":
+                return yield client.deployments.beginValidateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+            case "managementGroup":
+                return yield client.deployments.beginValidateAtManagementGroupScopeAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+            case "tenant":
+                yield client.deployments.beginValidateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+        }
+    });
+}
+function deploymentWhatIf(config, files) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const deploymentName = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
+        const scope = config.scope;
+        const client = getDeploymentClient(scope);
+        const deployment = getDeployment(config, files);
+        switch (scope.type) {
+            case "resourceGroup":
+                return yield client.deployments.beginWhatIfAndWait(scope.resourceGroup, deploymentName, deployment);
+            case "subscription":
+                return yield client.deployments.beginWhatIfAtSubscriptionScopeAndWait(deploymentName, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+            case "managementGroup":
+                return yield client.deployments.beginWhatIfAtManagementGroupScopeAndWait(scope.managementGroup, deploymentName, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+            case "tenant":
+                return yield client.deployments.beginWhatIfAtTenantScopeAndWait(deploymentName, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
+        }
+    });
+}
+function getDeployment(config, files) {
+    const { templateContents, templateSpecId, parametersContents } = files;
+    return {
+        location: config.location,
+        properties: {
+            mode: "Incremental",
+            template: templateContents,
+            templateLink: templateSpecId
+                ? {
+                    id: templateSpecId,
+                }
+                : undefined,
+            parameters: parametersContents["parameters"],
+            expressionEvaluationOptions: {
+                scope: "inner",
+            },
+        },
+        tags: config.tags,
+    };
+}
+function stackCreate(config, files) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
+        const scope = config.scope;
+        const client = getStacksClient(scope);
+        const stack = getStack(config, files);
+        switch (scope.type) {
+            case "resourceGroup":
+                return yield client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(scope.resourceGroup, name, stack);
+            case "subscription":
+                return yield client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
+            case "managementGroup":
+                return yield client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
+        }
+    });
+}
+function stackValidate(config, files) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
+        const scope = config.scope;
+        const client = getStacksClient(scope);
+        const stack = getStack(config, files);
+        switch (scope.type) {
+            case "resourceGroup":
+                return yield client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(scope.resourceGroup, name, stack);
+            case "subscription":
+                return yield client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
+            case "managementGroup":
+                return yield client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
+        }
+    });
+}
+function stackDelete(config) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
+        const scope = config.scope;
+        const client = getStacksClient(scope);
+        switch (scope.type) {
+            case "resourceGroup":
+                return yield client.deploymentStacks.beginDeleteAtResourceGroupAndWait(scope.resourceGroup, name);
+            case "subscription":
+                return yield client.deploymentStacks.beginDeleteAtSubscriptionAndWait(name);
+            case "managementGroup":
+                return yield client.deploymentStacks.beginDeleteAtManagementGroupAndWait(scope.managementGroup, name);
+        }
+    });
+}
+function getStack(config, files) {
+    const { templateContents, templateSpecId, parametersContents } = files;
+    return {
+        properties: {
+            template: templateContents,
+            templateLink: templateSpecId
+                ? {
+                    id: templateSpecId,
+                }
+                : undefined,
+            parameters: parametersContents["parameters"],
+            description: config.description,
+            actionOnUnmanage: config.actionOnUnManage,
+            denySettings: config.denySettings,
+            bypassStackOutOfSyncError: config.bypassStackOutOfSyncError,
+        },
+        tags: config.tags,
+    };
+}
+function requireLocation(config) {
+    // this just exists to make typescript's validation happy.
+    // it should only be called in places where we've already validated the location is set.
+    if (!config.location) {
+        throw new Error("Location is required");
+    }
+    return config.location;
+}
+function tryWithErrorHandling(action, onError) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        try {
+            return yield action();
+        }
+        catch (ex) {
+            if (ex instanceof core_rest_pipeline_1.RestError) {
+                const correlationId = (_a = ex.response) === null || _a === void 0 ? void 0 : _a.headers.get("x-ms-correlation-request-id");
+                (0, logging_1.logError)(`Request failed. CorrelationId: ${correlationId}`);
+                const { error } = ex.details;
+                if (error) {
+                    onError(error);
+                    return;
+                }
+            }
+            throw ex;
+        }
+    });
 }
 
 
@@ -58469,7 +58510,7 @@ const logging_1 = __nccwpck_require__(6679);
 function compileBicepParams(paramFilePath) {
     return __awaiter(this, void 0, void 0, function* () {
         const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
-        const result = yield withBicep(bicepPath, (bicep) => bicep.compileParams({
+        const result = yield withBicep(bicepPath, bicep => bicep.compileParams({
             path: paramFilePath,
             parameterOverrides: {},
         }));
@@ -58487,7 +58528,7 @@ function compileBicepParams(paramFilePath) {
 function compileBicep(templateFilePath) {
     return __awaiter(this, void 0, void 0, function* () {
         const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
-        const result = yield withBicep(bicepPath, (bicep) => bicep.compile({
+        const result = yield withBicep(bicepPath, bicep => bicep.compile({
             path: templateFilePath,
         }));
         logDiagnostics(result.diagnostics);
@@ -58598,6 +58639,7 @@ exports.getOptionalStringInput = getOptionalStringInput;
 exports.getOptionalFilePath = getOptionalFilePath;
 exports.getOptionalBooleanInput = getOptionalBooleanInput;
 exports.getOptionalStringArrayInput = getOptionalStringArrayInput;
+exports.getOptionalEnumArrayInput = getOptionalEnumArrayInput;
 exports.getOptionalStringDictionaryInput = getOptionalStringDictionaryInput;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -58646,12 +58688,22 @@ function getOptionalStringArrayInput(inputName) {
     if (!Array.isArray(input)) {
         throw new Error(`Action input '${inputName}' must be a JSON string array`);
     }
-    input.forEach((val) => {
+    input.forEach(val => {
         if (typeof val !== "string") {
             throw new Error(`Action input '${inputName}' must be a JSON string array`);
         }
     });
     return input;
+}
+function getOptionalEnumArrayInput(inputName, allowedValues) {
+    const values = getOptionalStringArrayInput(inputName);
+    const allowedValuesString = allowedValues;
+    for (const value of values) {
+        if (allowedValuesString.indexOf(value) === -1) {
+            throw new Error(`Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`);
+        }
+    }
+    return values;
 }
 function getOptionalStringDictionaryInput(inputName) {
     const inputString = getOptionalStringInput(inputName);
@@ -58662,7 +58714,7 @@ function getOptionalStringDictionaryInput(inputName) {
     if (typeof input !== "object") {
         throw new Error(`Action input '${inputName}' must be a dictionary of string values`);
     }
-    Object.keys(input).forEach((key) => {
+    Object.keys(input).forEach(key => {
         if (typeof input[key] !== "string") {
             throw new Error(`Action input '${inputName}' must be a dictionary of string values`);
         }
@@ -58725,7 +58777,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logError = exports.logWarning = exports.logInfo = exports.Color = void 0;
+exports.logError = exports.logErrorRaw = exports.logWarning = exports.logWarningRaw = exports.logInfo = exports.logInfoRaw = exports.Color = void 0;
+exports.colorize = colorize;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
@@ -58743,15 +58796,597 @@ var Color;
 function colorize(message, color) {
     return message
         .split("\n")
-        .map((line) => `${color}${line}${Color.Reset}`)
+        .map(line => `${color}${line}${Color.Reset}`)
         .join("\n");
 }
-const logInfo = (message) => core.info(colorize(message, Color.Blue));
+const logInfoRaw = (message) => core.info(message);
+exports.logInfoRaw = logInfoRaw;
+const logInfo = (message) => (0, exports.logInfoRaw)(colorize(message, Color.Blue));
 exports.logInfo = logInfo;
-const logWarning = (message) => core.warning(colorize(message, Color.Yellow));
+const logWarningRaw = (message) => core.warning(message);
+exports.logWarningRaw = logWarningRaw;
+const logWarning = (message) => (0, exports.logWarningRaw)(colorize(message, Color.Yellow));
 exports.logWarning = logWarning;
-const logError = (message) => core.error(colorize(message, Color.Red));
+const logErrorRaw = (message) => core.error(message);
+exports.logErrorRaw = logErrorRaw;
+const logError = (message) => (0, exports.logErrorRaw)(colorize(message, Color.Red));
 exports.logError = logError;
+
+
+/***/ }),
+
+/***/ 2852:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.formatWhatIfOperationResult = formatWhatIfOperationResult;
+const logging_1 = __nccwpck_require__(6679);
+var Symbol;
+(function (Symbol) {
+    Symbol["WhiteSpace"] = " ";
+    Symbol["Quote"] = "\"";
+    Symbol["Colon"] = ":";
+    Symbol["LeftSquareBracket"] = "[";
+    Symbol["RightSquareBracket"] = "]";
+    Symbol["Dot"] = ".";
+    Symbol["Equal"] = "=";
+    Symbol["Asterisk"] = "*";
+    Symbol["Plus"] = "+";
+    Symbol["Minus"] = "-";
+    Symbol["Tilde"] = "~";
+    Symbol["ExclamationPoint"] = "!";
+    Symbol["Cross"] = "x";
+})(Symbol || (Symbol = {}));
+const changeTypeToColor = {
+    Create: logging_1.Color.Green,
+    Delete: logging_1.Color.Yellow,
+    Modify: logging_1.Color.Magenta,
+    Deploy: logging_1.Color.Blue,
+    NoChange: logging_1.Color.Reset,
+    Ignore: logging_1.Color.White,
+    Unsupported: logging_1.Color.White,
+};
+const propertyChangeTypeToColor = {
+    Create: logging_1.Color.Green,
+    Delete: logging_1.Color.Yellow,
+    Modify: logging_1.Color.Magenta,
+    Array: logging_1.Color.Magenta,
+    NoEffect: logging_1.Color.White,
+};
+const changeTypeToSymbol = {
+    Create: Symbol.Plus,
+    Delete: Symbol.Minus,
+    Modify: Symbol.Tilde,
+    Deploy: Symbol.ExclamationPoint,
+    NoChange: Symbol.Equal,
+    Ignore: Symbol.Asterisk,
+    Unsupported: Symbol.Cross,
+};
+const propertyChangeTypeToSymbol = {
+    Create: Symbol.Plus,
+    Delete: Symbol.Minus,
+    Modify: Symbol.Tilde,
+    Array: Symbol.Tilde,
+    NoEffect: Symbol.Cross,
+};
+const changeTypeToWeight = {
+    Delete: 0,
+    Create: 1,
+    Deploy: 2,
+    Modify: 3,
+    NoChange: 4,
+    Unsupported: 5,
+    Ignore: 6,
+};
+const propertyChangeTypeToWeight = {
+    Delete: 0,
+    Create: 1,
+    Modify: 2,
+    Array: 2,
+    NoEffect: 3,
+};
+const propertyChangeToChangeType = {
+    Array: "Modify",
+    Create: "Create",
+    Delete: "Delete",
+    Modify: "Modify",
+    NoEffect: "NoChange",
+};
+class StringBuilder {
+    constructor(enableColor) {
+        this.enableColor = enableColor;
+        this.buffer = "";
+    }
+    append(value, color) {
+        if (color) {
+            this.withColorScope(color, () => {
+                this.buffer += value;
+            });
+        }
+        else {
+            this.buffer += value;
+        }
+        return this;
+    }
+    appendLine(value = "") {
+        this.append(value + "\n");
+        return this;
+    }
+    withColorScope(color, action) {
+        if (this.enableColor) {
+            this.append(color);
+        }
+        action();
+        if (this.enableColor) {
+            this.append(logging_1.Color.Reset);
+        }
+    }
+    build() {
+        return this.buffer;
+    }
+}
+function formatWhatIfOperationResult(whatIfOperationResult, enableColor = true) {
+    var _a, _b, _c;
+    const builder = new StringBuilder(enableColor);
+    formatNoiseNotice(builder);
+    formatChangeTypeLegend(builder, (_a = whatIfOperationResult.changes) !== null && _a !== void 0 ? _a : []);
+    formatResourceChanges(builder, (_b = whatIfOperationResult.changes) !== null && _b !== void 0 ? _b : []);
+    formatResourceChangesStats(builder, (_c = whatIfOperationResult.changes) !== null && _c !== void 0 ? _c : []);
+    return builder.build();
+}
+function formatNoiseNotice(builder) {
+    builder.appendLine(`Note: The result may contain false positive predictions (noise).
+You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues`);
+    builder.appendLine();
+}
+function formatChangeTypeLegend(builder, resourceChanges) {
+    var _a;
+    if (!resourceChanges.length)
+        return;
+    const changeTypeSet = new Set();
+    function populateChangeTypeSet(propertyChanges) {
+        var _a;
+        if (!propertyChanges.length)
+            return;
+        for (const propertyChange of propertyChanges) {
+            const propertyChangeType = propertyChange.propertyChangeType;
+            changeTypeSet.add(propertyChangeToChangeType[propertyChangeType]);
+            populateChangeTypeSet((_a = propertyChange.children) !== null && _a !== void 0 ? _a : []);
+        }
+    }
+    for (const resourceChange of resourceChanges) {
+        changeTypeSet.add(resourceChange.changeType);
+        populateChangeTypeSet((_a = resourceChange.delta) !== null && _a !== void 0 ? _a : []);
+    }
+    const changeTypes = Array.from(changeTypeSet).sort((a, b) => changeTypeToWeight[a] - changeTypeToWeight[b]);
+    builder.append("Resource and property changes are indicated with ");
+    builder.appendLine(changeTypes.length === 1 ? "this symbol:" : "these symbols:");
+    for (const changeType of changeTypes) {
+        const changeTypeSymbol = changeTypeToSymbol[changeType];
+        const changeTypeColor = changeTypeToColor[changeType];
+        formatIndent(builder);
+        builder.append(changeTypeSymbol, changeTypeColor).append(Symbol.WhiteSpace);
+        builder.appendLine(changeType.charAt(0).toUpperCase() + changeType.slice(1));
+    }
+}
+function formatResourceChangesStats(builder, resourceChanges) {
+    builder.appendLine().append("Resource changes: ");
+    if (!resourceChanges.length) {
+        builder.append("no change.");
+        return;
+    }
+    const sortedResourceChanges = resourceChanges.sort((a, b) => changeTypeToWeight[a.changeType] - changeTypeToWeight[b.changeType]);
+    const resourceChangesByChangeType = groupBy(sortedResourceChanges, x => x.changeType);
+    const countByChangeType = entries(resourceChangesByChangeType)
+        .map(([key, value]) => ({ key, count: value.length }))
+        .filter(x => x.count > 0);
+    const changeTypeStats = countByChangeType.map(x => formatChangeTypeCount(x.key, x.count));
+    builder.append(changeTypeStats.join(", ")).append(".");
+}
+function formatChangeTypeCount(changeType, count) {
+    switch (changeType) {
+        case "Create":
+            return `${count} to create`;
+        case "Delete":
+            return `${count} to delete`;
+        case "Deploy":
+            return `${count} to deploy`;
+        case "Modify":
+            return `${count} to modify`;
+        case "Ignore":
+            return `${count} to ignore`;
+        case "NoChange":
+            return `${count} no change`;
+        case "Unsupported":
+            return `${count} unsupported`;
+        default:
+            throw new Error(`Invalid ChangeType: ${changeType}`);
+    }
+}
+function formatResourceChanges(builder, resourceChanges) {
+    if (!resourceChanges.length)
+        return;
+    const numScopes = new Set(resourceChanges.map(getScopeUppercase)).size;
+    const resourceChangesByScope = groupBy(resourceChanges.sort((a, b) => getScopeUppercase(a).localeCompare(getScopeUppercase(b))), getScopeUppercase);
+    builder.appendLine();
+    builder.appendLine(`The deployment will update the following ${numScopes === 1 ? "scope:" : "scopes:"}`);
+    for (const [scope, resourceChangesInScope] of entries(resourceChangesByScope)) {
+        formatResourceChangesInScope(builder, scope, resourceChangesInScope);
+    }
+}
+function formatResourceChangesInScope(builder, scope, resourceChangesInScope) {
+    builder.appendLine().appendLine(`Scope: ${scope}`);
+    const sortedResourceChanges = resourceChangesInScope.sort((a, b) => changeTypeToWeight[a.changeType] - changeTypeToWeight[b.changeType]);
+    const grouped = groupBy(sortedResourceChanges, x => x.changeType);
+    for (const [changeType, resourceChanges] of entries(grouped)) {
+        builder.withColorScope(changeTypeToColor[changeType], () => {
+            for (const resourceChange of resourceChanges) {
+                const isLast = resourceChange ===
+                    sortedResourceChanges[sortedResourceChanges.length - 1];
+                formatResourceChange(builder, resourceChange, isLast);
+            }
+        });
+    }
+}
+function formatResourceChange(builder, resourceChange, isLast) {
+    const changeType = resourceChange.changeType;
+    const relativeResourceId = getRelativeResourceId(resourceChange);
+    const apiVersion = getApiVersion(resourceChange);
+    builder.appendLine();
+    formatResourceChangePath(builder, changeType, relativeResourceId, apiVersion);
+    if (changeType === "Create" && resourceChange.after) {
+        formatJsonValue(builder, resourceChange.after, "", 2);
+    }
+    else if (changeType === "Delete" && resourceChange.before) {
+        formatJsonValue(builder, resourceChange.before, "", 2);
+    }
+    else if (resourceChange.delta) {
+        const delta = resourceChange.delta;
+        builder.withColorScope(logging_1.Color.Reset, () => {
+            builder.appendLine();
+            formatPropertyChanges(builder, delta.sort((a, b) => propertyChangeTypeToWeight[a.propertyChangeType] -
+                propertyChangeTypeToWeight[b.propertyChangeType]));
+        });
+    }
+    else if (isLast) {
+        builder.appendLine();
+    }
+}
+function formatResourceChangePath(builder, changeType, resourceChangeId, apiVersion) {
+    formatPath(builder, resourceChangeId, 0, 1, builder => formatResourceChangeType(builder, changeType), builder => formatResourceChangeApiVersion(builder, apiVersion));
+}
+function formatResourceChangeType(builder, changeType) {
+    const changeSymbol = changeTypeToSymbol[changeType];
+    builder.append(changeSymbol).append(Symbol.WhiteSpace);
+}
+function formatResourceChangeApiVersion(builder, apiVersion) {
+    if (!apiVersion)
+        return;
+    builder.withColorScope(logging_1.Color.Reset, () => {
+        builder.append(Symbol.WhiteSpace);
+        builder.append(Symbol.LeftSquareBracket);
+        builder.append(apiVersion);
+        builder.append(Symbol.RightSquareBracket);
+    });
+}
+function formatPropertyChanges(builder, propertyChanges, indentLevel = 2) {
+    const maxPathLength = getMaxPathLengthFromPropertyChanges(propertyChanges);
+    for (const propertyChange of propertyChanges) {
+        formatPropertyChange(builder, propertyChange, maxPathLength, indentLevel);
+        builder.appendLine();
+    }
+}
+function formatPropertyChange(builder, propertyChange, maxPathLength, indentLevel) {
+    const propertyChangeType = propertyChange.propertyChangeType;
+    const before = propertyChange.before;
+    const after = propertyChange.after;
+    const children = propertyChange.children || [];
+    switch (propertyChangeType) {
+        case "Create":
+            formatPropertyChangePath(builder, propertyChange, propertyChange.after, maxPathLength, indentLevel);
+            formatPropertyCreate(builder, after, indentLevel + 1);
+            break;
+        case "Delete":
+            formatPropertyChangePath(builder, propertyChange, propertyChange.before, maxPathLength, indentLevel);
+            formatPropertyDelete(builder, before, indentLevel + 1);
+            break;
+        case "Modify":
+            formatPropertyChangePath(builder, propertyChange, propertyChange.before, maxPathLength, indentLevel);
+            formatPropertyModify(builder, before, after, children, indentLevel + 1);
+            break;
+        case "Array":
+            formatPropertyChangePath(builder, propertyChange, propertyChange.children, maxPathLength, indentLevel);
+            formatPropertyArrayChange(builder, propertyChange, children, indentLevel + 1);
+            break;
+        case "NoEffect":
+            formatPropertyChangePath(builder, propertyChange, propertyChange.after, maxPathLength, indentLevel);
+            formatPropertyNoEffect(builder, after, indentLevel + 1);
+            break;
+        default:
+            throw new Error(`Unknown property change type: ${propertyChangeType}.`);
+    }
+}
+function formatPropertyChangePath(builder, propertyChange, value, maxPathLength, indentLevel) {
+    if (!propertyChange.path)
+        return;
+    const path = propertyChange.path;
+    const propertyChangeType = propertyChange.propertyChangeType;
+    let paddingWidth = maxPathLength - path.length + 1;
+    if (isNonEmptyArray(value)) {
+        paddingWidth = 1;
+    }
+    else if (isNonEmptyObject(value)) {
+        paddingWidth = 0;
+    }
+    else if (propertyChangeType === "Modify" && propertyChange.children) {
+        paddingWidth = 0; // Has nested changes.
+    }
+    formatPath(builder, path, paddingWidth, indentLevel, builder => formatPropertyChangeType(builder, propertyChangeType), formatColon);
+}
+function formatPropertyChangeType(builder, propertyChangeType) {
+    const propertyChangeSymbol = propertyChangeTypeToSymbol[propertyChangeType];
+    const propertyChangeColor = propertyChangeTypeToColor[propertyChangeType];
+    builder
+        .append(propertyChangeSymbol, propertyChangeColor)
+        .append(Symbol.WhiteSpace);
+}
+function formatPropertyNoEffect(builder, value, indentLevel) {
+    builder.withColorScope(propertyChangeTypeToColor["NoEffect"], () => {
+        formatJsonValue(builder, value, undefined, undefined, indentLevel);
+    });
+}
+function formatPropertyCreate(builder, value, indentLevel) {
+    builder.withColorScope(propertyChangeTypeToColor["Create"], () => {
+        formatJsonValue(builder, value, undefined, undefined, indentLevel);
+    });
+}
+function formatPropertyDelete(builder, value, indentLevel) {
+    builder.withColorScope(propertyChangeTypeToColor["Delete"], () => {
+        formatJsonValue(builder, value, undefined, undefined, indentLevel);
+    });
+}
+function formatPropertyModify(builder, before, after, children, indentLevel) {
+    if (children) {
+        // Has nested changes.
+        builder.appendLine().appendLine();
+        formatPropertyChanges(builder, 
+        // TODO is this implemented correctly?
+        sortBy(children, x => propertyChangeTypeToWeight[x.propertyChangeType]), indentLevel);
+    }
+    else {
+        formatPropertyDelete(builder, before, indentLevel);
+        // Space before =>
+        if (isNonEmptyObject(before)) {
+            builder.appendLine();
+            formatIndent(builder, indentLevel);
+        }
+        else {
+            builder.append(Symbol.WhiteSpace);
+        }
+        builder.append("=>");
+        // Space after =>
+        if (!isNonEmptyObject(after)) {
+            builder.append(Symbol.WhiteSpace);
+        }
+        formatPropertyCreate(builder, after, indentLevel);
+        if (!isLeaf(before) && isLeaf(after)) {
+            builder.appendLine();
+        }
+    }
+}
+function formatPropertyArrayChange(builder, parentPropertyChange, propertyChanges, indentLevel) {
+    if (!parentPropertyChange.path) {
+        // The parent change doesn't have a path, which means the current
+        // array change is a nested change. Decrease indent level.
+        indentLevel -= 1;
+        formatIndent(builder, indentLevel);
+    }
+    if (!propertyChanges || propertyChanges.length === 0) {
+        builder.appendLine("[]");
+        return;
+    }
+    // [
+    builder.append(Symbol.LeftSquareBracket).appendLine();
+    formatPropertyChanges(builder, 
+    // TODO is this implemented correctly?
+    sortBy(propertyChanges, x => propertyChangeTypeToWeight[x.propertyChangeType]), indentLevel);
+    // ]
+    formatIndent(builder, indentLevel);
+    builder.append(Symbol.RightSquareBracket);
+}
+function getApiVersion(resourceChange) {
+    if (resourceChange.before) {
+        return resourceChange.before.apiVersion;
+    }
+    if (resourceChange.after) {
+        return resourceChange.after.apiVersion;
+    }
+}
+function getScope(resourceChange) {
+    const [scope] = splitResourceId(resourceChange.resourceId);
+    return scope;
+}
+function getScopeUppercase(resourceChange) {
+    return getScope(resourceChange).toUpperCase();
+}
+function getRelativeResourceId(resourceChange) {
+    const [, relativeResourceId] = splitResourceId(resourceChange.resourceId);
+    return relativeResourceId;
+}
+function getMaxPathLengthFromPropertyChanges(propertyChanges) {
+    if (!propertyChanges || propertyChanges.length === 0) {
+        return 0;
+    }
+    const filteredPropertyChanges = propertyChanges.filter(shouldConsiderPropertyChangePath);
+    const pathLengths = filteredPropertyChanges.map(x => x.path.length);
+    return Math.max(...pathLengths, 0);
+}
+function shouldConsiderPropertyChangePath(propertyChange) {
+    const propertyChangeType = propertyChange.propertyChangeType;
+    if (propertyChangeType === "Create") {
+        return isLeaf(propertyChange.after);
+    }
+    if (propertyChangeType === "Delete" || propertyChangeType === "Modify") {
+        return isLeaf(propertyChange.before);
+    }
+    return !propertyChange.children;
+}
+function formatJsonValue(builder, value, path = "", maxPathLength = 0, indentLevel = 0) {
+    if (isLeaf(value)) {
+        formatJsonPath(builder, path, maxPathLength - path.length + 1, indentLevel);
+        formatLeaf(builder, value);
+    }
+    else if (isNonEmptyArray(value)) {
+        formatJsonPath(builder, path, 1, indentLevel);
+        formatNonEmptyArray(builder, value, indentLevel);
+    }
+    else if (isNonEmptyObject(value)) {
+        formatNonEmptyObject(builder, value, path, maxPathLength, indentLevel);
+    }
+    else {
+        throw new Error(`Invalid JSON value: ${value}`);
+    }
+}
+function formatLeaf(builder, value) {
+    if (value === null) {
+        builder.append("null");
+    }
+    else if (typeof value === "boolean") {
+        builder.append(String(value).toLowerCase());
+    }
+    else if (typeof value === "string") {
+        builder.append(Symbol.Quote).append(value).append(Symbol.Quote);
+    }
+    else {
+        builder.append(String(value));
+    }
+}
+function formatNonEmptyArray(builder, value, indentLevel) {
+    builder.append(Symbol.LeftSquareBracket, logging_1.Color.Reset).appendLine();
+    const maxPathLength = getMaxPathLengthFromArray(value);
+    value.forEach((childValue, index) => {
+        const childPath = String(index);
+        if (isNonEmptyObject(childValue)) {
+            formatJsonPath(builder, childPath, 0, indentLevel + 1);
+            formatNonEmptyObject(builder, childValue, undefined, undefined, indentLevel + 1);
+        }
+        else {
+            formatJsonValue(builder, childValue, childPath, maxPathLength, indentLevel + 1);
+        }
+        builder.appendLine();
+    });
+    formatIndent(builder, indentLevel);
+    builder.append(Symbol.RightSquareBracket, logging_1.Color.Reset);
+}
+function formatNonEmptyObject(builder, value, path = "", maxPathLength = 0, indentLevel = 0) {
+    const isRoot = !path;
+    if (!path) {
+        // Root object.
+        builder.appendLine().appendLine();
+        maxPathLength = getMaxPathLengthFromObject(value);
+        indentLevel += 1;
+    }
+    for (const [childPath, childValue] of entries(value)) {
+        const formattedChildPath = isRoot
+            ? childPath
+            : `${path}${Symbol.Dot}${childPath}`;
+        formatJsonValue(builder, childValue, formattedChildPath, maxPathLength, indentLevel);
+        if (!isNonEmptyObject(childValue)) {
+            builder.appendLine();
+        }
+    }
+}
+function formatJsonPath(builder, path, paddingWidth, indentLevel) {
+    formatPath(builder, path, paddingWidth, indentLevel, undefined, formatColon);
+}
+function formatPath(builder, path, paddingWidth, indentLevel, formatHead, formatTail) {
+    if (!path)
+        return;
+    formatIndent(builder, indentLevel);
+    if (formatHead) {
+        formatHead(builder);
+    }
+    builder.append(path);
+    if (formatTail) {
+        formatTail(builder);
+    }
+    builder.append(" ".repeat(paddingWidth));
+}
+function formatColon(builder) {
+    builder.append(Symbol.Colon, logging_1.Color.Reset);
+}
+function formatIndent(builder, indentLevel = 1) {
+    builder.append(" ".repeat(2 * indentLevel));
+}
+function getMaxPathLengthFromArray(value) {
+    let maxLengthIndex = 0;
+    value.forEach((childValue, index) => {
+        if (isLeaf(childValue)) {
+            maxLengthIndex = index;
+        }
+    });
+    return String(maxLengthIndex).length;
+}
+function getMaxPathLengthFromObject(value) {
+    let maxPathLength = 0;
+    for (const [key, childValue] of entries(value)) {
+        if (isNonEmptyArray(childValue)) {
+            continue; // Ignore array paths
+        }
+        const currentPathLength = isNonEmptyObject(childValue)
+            ? key.length + 1 + getMaxPathLengthFromObject(childValue)
+            : key.length;
+        maxPathLength = Math.max(maxPathLength, currentPathLength);
+    }
+    return maxPathLength;
+}
+function isLeaf(value) {
+    return (value === null ||
+        typeof value === "boolean" ||
+        typeof value === "number" ||
+        typeof value === "string" ||
+        (Array.isArray(value) && value.length === 0) ||
+        (typeof value === "object" && value && Object.keys(value).length === 0));
+}
+function isNonEmptyArray(value) {
+    return Array.isArray(value) && value.length > 0;
+}
+function isNonEmptyObject(value) {
+    return (typeof value === "object" && value !== null && Object.keys(value).length > 0);
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function groupBy(array, getKey) {
+    return array.reduce((result, item) => {
+        const key = getKey(item);
+        (result[key] = result[key] || []).push(item);
+        return result;
+    }, {});
+}
+function sortBy(array, getWeight) {
+    return array.slice().sort((a, b) => getWeight(a) - getWeight(b));
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function entries(record) {
+    return entries(record);
+}
+function splitResourceId(resourceId) {
+    const providers = "/providers/";
+    const providersIndex = resourceId.lastIndexOf(providers);
+    if (providersIndex === -1) {
+        const rgMatches = resourceId.matchAll(/^(\/subscriptions\/[^/]+)\/(resourceGroups\/[^/]+)$/i);
+        if (rgMatches) {
+            const matchesArray = [...rgMatches];
+            return [matchesArray[1][0], matchesArray[2][0]];
+        }
+        return ["/", resourceId.substring(1)];
+    }
+    return [
+        resourceId.substring(0, providersIndex),
+        resourceId.substring(providersIndex + providers.length),
+    ];
+}
 
 
 /***/ }),

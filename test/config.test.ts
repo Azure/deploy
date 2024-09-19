@@ -120,6 +120,20 @@ describe("input validation", () => {
     );
   });
 
+  it("validates what-if-exclude-change-types inputs for deployment", async () => {
+    configureGetInputMock({
+      type: "deployment",
+      operation: "create",
+      scope: "resourceGroup",
+      "subscription-id": "foo",
+      "resource-group-name": "mockRg",
+      "what-if-exclude-change-types": "[\"blah\"]",
+    });
+    expect(() => parseConfig()).toThrow(
+      "Action input 'what-if-exclude-change-types' must be one of the following values: 'create', 'delete', 'modify', 'deploy', 'noChange', 'ignore', 'unsupported'"
+    );
+  });
+
   it("requires action-on-unmanage-resources for deploymentStack", async () => {
     configureGetInputMock({
       type: "deploymentStack",
@@ -236,6 +250,7 @@ describe("input parsing", () => {
       "parameters-file": "/path/to/mockParametersFile",
       description: "mockDescription",
       tags: '{"foo": "bar"}',
+      "what-if-exclude-change-types": "[\"noChange\"]",
     });
 
     const config = parseConfig();
@@ -253,6 +268,11 @@ describe("input parsing", () => {
       parametersFile: "/path/to/mockParametersFile",
       tags: {
         foo: "bar",
+      },
+      whatIf: {
+        excludeChangeTypes: [
+          "noChange",
+        ],
       },
     });
   });
