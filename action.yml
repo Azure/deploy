@@ -1,100 +1,93 @@
-name: 'Azure Deploy'
-description: 'GitHub Action for deploying to Azure'
-author: 'Microsoft'
+name: "Azure Deploy"
+description: "GitHub Action for deploying to Azure"
+author: "Microsoft"
 
 inputs:
   type:
-    description: ''
+    description: "Specifies the execution type, which can be either 'deployment' or 'deploymentStack'."
     required: true
   operation:
-    description: ''
+    description: "Specifies the operation to perform. For deployment, choose from 'create', 'validate', 'whatIf'. For deploymentStack, choose from 'create', 'delete', 'whatIf'."
     required: true
 
   name:
-    description: ''
+    description: "Specifies the name of the deployment or the deploymentStack."
     required: true
   location:
-    description: ''
+    description: "Specifies the location of the deployment or the deploymentStack."
     required: true
 
   scope:
-    description: ''
+    description: "Specifies the scope of the deployment or the deploymentStack. For deployment, choose from 'resourceGroup', 'subscription', 'managementGroup', 'tenant'. For deploymentStack, choose from 'resourceGroup', 'subscription', 'managementGroup'."
     required: true
   tenant-id:
-    description: ''
+    description: "Specifies the tenant ID."
     required: false
   management-group-id:
-    description: ''
+    description: "Specifies the management group ID."
     required: false
   subscription-id:
-    description: ''
+    description: "Specifies the subscription ID."
     required: false
   resource-group-name:
-    description: ''
+    description: "Specifies the resource group name."
     required: false
 
   template-file:
-    description: ''
+    description: "Specifies the path to the template file."
     required: false
   template-spec:
-    description: ''
+    description: "Specifies the template spec resource ID."
     required: false
   template-uri:
-    description: ''
+    description: "Specifies the HTTP URI of the template."
     required: false
 
   parameters-file:
-    description: ''
+    description: "Specifies the path to the parameters file."
     required: false
 
   what-if:
-    description: ''
+    description: ""
     required: false
-    default: ''
+    default: ""
   what-if-exclude-change-type:
-    description: ''
+    description: ""
     required: false
-    default: ''
+    default: ""
   what-if-result-format:
-    description: ''
+    description: ""
     required: false
-    default: ''
+    default: ""
 
   action-on-unmanage-resources:
-    description: ''
+    description: "Specifies the action to take on unmanaged resources. Choose from 'delete' or 'detach'."
     required: false
-    default: ''
   action-on-unmanage-resourcegroups:
-    description: ''
+    description: "Specifies the action to take on unmanaged resource groups. Choose from 'delete' or 'detach'."
     required: false
-    default: ''
   action-on-unmanage-managementgroup:
-    description: ''
+    description: "Specifies the action to take on unmanaged management groups. Choose from 'delete' or 'detach'."
     required: false
-    default: ''
   deny-settings-mode:
-    description: ''
+    description: "Specifies the mode of the deny settings. Choose from 'denyDelete', 'denyWriteAndDelete', 'none'."
     required: false
-    default: ''
   deny-settings-excluded-action:
-    description: ''
+    description: "Specifies the excluded action for the deny settings."
     required: false
-    default: ''
   deny-settings-excluded-principals:
-    description: ''
+    description: "Specifies the excluded principals for the deny settings."
     required: false
-    default: ''
   bypass-stack-out-of-sync-error:
-    description: ''
+    description: "Specifies whether to bypass the stack out of sync error. Choose from 'true' or 'false'."
     required: false
-    default: ''
 
   description:
-    description: ''
+    description: "Specifies the description of the deploymentStack."
     required: false
 
   tags:
-    description: ''
+    description: "Specifies the tags for the deploymentStack."
     required: false
 
 runs:
