@@ -65,7 +65,29 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Test Local Action (Deployment)
+      - name: Test Deployment - Validate
+        uses: ./
+        with:
+          type: deployment
+          operation: validate
+          name: ci-deploy-${{ matrix.os }}
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: azure-deploy-ci
+          parameters-file: test/files/basic/main.bicepparam
+
+      - name: Test Deployment - WhatIf
+        uses: ./
+        with:
+          type: deployment
+          operation: whatIf
+          name: ci-deploy-${{ matrix.os }}
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: azure-deploy-ci
+          parameters-file: test/files/basic/main.bicepparam
+
+      - name: Test Deployment - Deploy
         uses: ./
         with:
           type: deployment

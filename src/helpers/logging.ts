@@ -13,16 +13,18 @@ export enum Color {
   Reset = "\x1b[0m",
 }
 
-function colorize(message: string, color: Color) {
+export function colorize(message: string, color: Color) {
   return message
     .split("\n")
-    .map((line) => `${color}${line}${Color.Reset}`)
+    .map(line => `${color}${line}${Color.Reset}`)
     .join("\n");
 }
-
+export const logInfoRaw = (message: string) => core.info(message);
 export const logInfo = (message: string) =>
-  core.info(colorize(message, Color.Blue));
+  logInfoRaw(colorize(message, Color.Blue));
+export const logWarningRaw = (message: string) => core.warning(message);
 export const logWarning = (message: string) =>
-  core.warning(colorize(message, Color.Yellow));
+  logWarningRaw(colorize(message, Color.Yellow));
+export const logErrorRaw = (message: string) => core.error(message);
 export const logError = (message: string) =>
-  core.error(colorize(message, Color.Red));
+  logErrorRaw(colorize(message, Color.Red));

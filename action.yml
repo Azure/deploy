@@ -49,7 +49,6 @@ inputs:
 
   what-if-exclude-change-type:
     description: "Specifies the change type to exclude from the 'What If' operation."
-    required: false
 
   action-on-unmanage-resources:
     description: "Specifies the action to take on unmanaged resources. Choose from 'delete' or 'detach'."

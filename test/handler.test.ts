@@ -28,19 +28,23 @@ const azureMock = {
 jest.mock('../src/helpers/azure', () => azureMock);
 
 const mockActionsCore = {
+  info: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
   setOutput: jest.fn(),
   setFailed: jest.fn(),
 }
 
 jest.mock('@actions/core', () => mockActionsCore);
 
+import { RestError } from "@azure/core-rest-pipeline";
 import { DeploymentsConfig, DeploymentStackConfig, ResourceGroupScope, SubscriptionScope } from '../src/config'
 import { readTestFile } from './utils';
 import { execute } from '../src/handler';
 import { ParsedFiles } from '../src/helpers/file';
-import { Deployment, DeploymentExtended, DeploymentProperties, Deployments } from '@azure/arm-resources';
+import { Deployment, DeploymentExtended, DeploymentProperties, Deployments, ErrorResponse } from '@azure/arm-resources';
 import { DeploymentStack, DeploymentStackProperties, DeploymentStacks } from '@azure/arm-resourcesdeploymentstacks';
-import { setFailed, setOutput } from '@actions/core';
+import { Color, colorize } from "../src/helpers/logging";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -60,6 +64,9 @@ describe('deployment execution', () => {
       name: 'mockName',
       operation: 'create',
       tags: { foo: 'bar' },
+      whatIf: {
+        excludeChangeTypes: ['noChange'],
+      }
     };
 
     const files: ParsedFiles = {
@@ -105,6 +112,8 @@ describe('deployment execution', () => {
     });
     
     it('what-ifs', async () => {
+      mockDeploymentsOps.beginWhatIfAtSubscriptionScopeAndWait!.mockReturnValue(Promise.resolve({}));
+
       await execute({...config, operation: 'whatIf'}, files);
 
       expect(azureMock.createDeploymentClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
@@ -125,6 +134,9 @@ describe('deployment execution', () => {
       name: 'mockName',
       operation: 'create',
       tags: { foo: 'bar' },
+      whatIf: {
+        excludeChangeTypes: ['noChange'],
+      }
     };
 
     const files: ParsedFiles = {
@@ -150,6 +162,23 @@ describe('deployment execution', () => {
       ...expectedPayload,
       properties: { ...expectedProperties, outputs: {mockOutput: { value: 'foo' }} },
     };
+    const mockError = {
+      "code": "InvalidTemplateDeployment",
+      "message": "The template deployment 'bicep-deploy' is not valid according to the validation procedure. The tracking id is '06d4fb15-ecb0-4682-a6d9-1bf416ca0722'. See inner errors for details.",
+      "details": [
+        {
+          "code": "PreflightValidationCheckFailed",
+          "message": "Preflight validation failed. Please refer to the details for the specific errors.",
+          "details": [
+            {
+              "code": "StorageAccountAlreadyTaken",
+              "message": "The storage account named foo is already taken.",
+              "target": "foo"
+            }
+          ]
+        }
+      ]
+    };
     
     it('deploys', async () => {
       mockDeploymentsOps.beginCreateOrUpdateAndWait!.mockReturnValue(Promise.resolve(mockReturnPayload));
@@ -161,6 +190,17 @@ describe('deployment execution', () => {
       expect(mockActionsCore.setOutput).toHaveBeenCalledWith('mockOutput', 'foo');
     });
     
+    it('handles deploy errors', async () => {
+      mockDeploymentsOps.beginCreateOrUpdateAndWait!.mockRejectedValue(getMockRestError(mockError));
+
+      await execute({...config, operation: 'create'}, files);
+
+      expect(azureMock.createDeploymentClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
+      expect(mockDeploymentsOps.beginCreateOrUpdateAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
+
+      expect(mockActionsCore.error).toHaveBeenCalledWith(colorize(JSON.stringify(mockError, null, 2), Color.Red));
+    });
+    
     it('validates', async () => {
       await execute({...config, operation: 'validate'}, files);
 
@@ -168,7 +208,20 @@ describe('deployment execution', () => {
       expect(mockDeploymentsOps.beginValidateAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
     });
     
+    it('handles validate errors', async () => {
+      mockDeploymentsOps.beginValidateAndWait!.mockRejectedValue(getMockRestError(mockError));
+
+      await execute({...config, operation: 'validate'}, files);
+
+      expect(azureMock.createDeploymentClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
+      expect(mockDeploymentsOps.beginValidateAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
+
+      expect(mockActionsCore.error).toHaveBeenCalledWith(colorize(JSON.stringify(mockError, null, 2), Color.Red));
+    });
+    
     it('what-ifs', async () => {
+      mockDeploymentsOps.beginWhatIfAndWait!.mockReturnValue(Promise.resolve({}));
+
       await execute({...config, operation: 'whatIf'}, files);
 
       expect(azureMock.createDeploymentClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
@@ -327,3 +380,10 @@ describe('stack execution', () => {
     });
   });
 });
+
+function getMockRestError(errorResponse: ErrorResponse) {
+  const restError = new RestError('foo error');
+  restError.details = { error: errorResponse };
+
+  return restError;
+}

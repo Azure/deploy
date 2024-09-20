@@ -61,7 +61,7 @@ export function getOptionalStringArrayInput(inputName: string): string[] {
     throw new Error(`Action input '${inputName}' must be a JSON string array`);
   }
 
-  input.forEach((val) => {
+  input.forEach(val => {
     if (typeof val !== "string") {
       throw new Error(
         `Action input '${inputName}' must be a JSON string array`,
@@ -70,6 +70,24 @@ export function getOptionalStringArrayInput(inputName: string): string[] {
   });
 
   return input;
+}
+
+export function getOptionalEnumArrayInput<TEnum extends string>(
+  inputName: string,
+  allowedValues: TEnum[],
+): TEnum[] {
+  const values = getOptionalStringArrayInput(inputName);
+
+  const allowedValuesString = allowedValues as string[];
+  for (const value of values) {
+    if (allowedValuesString.indexOf(value) === -1) {
+      throw new Error(
+        `Action input '${inputName}' must be one of the following values: '${allowedValues.join(`', '`)}'`,
+      );
+    }
+  }
+
+  return values as TEnum[];
 }
 
 export function getOptionalStringDictionaryInput(
@@ -87,7 +105,7 @@ export function getOptionalStringDictionaryInput(
     );
   }
 
-  Object.keys(input).forEach((key) => {
+  Object.keys(input).forEach(key => {
     if (typeof input[key] !== "string") {
       throw new Error(
         `Action input '${inputName}' must be a dictionary of string values`,
