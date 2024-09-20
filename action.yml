@@ -47,8 +47,8 @@ inputs:
     description: "Specifies the path to the parameters file."
     required: false
 
-  what-if-exclude-change-type:
-    description: "Specifies the change type to exclude from the 'What If' operation."
+  what-if-exclude-change-types:
+    description: "Specifies the change types to exclude from the 'What If' operation."
     required: false
 
   action-on-unmanage-resources:
