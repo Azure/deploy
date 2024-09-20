@@ -4,10 +4,10 @@ author: "Microsoft"
 
 inputs:
   type:
-    description: "Specifies the execution type, which can be either ''deployment'' or ''deploymentStack''."
+    description: "Specifies the execution type, which can be either 'deployment' or 'deploymentStack'."
     required: true
   operation:
-    description: "Specifies the operation to perform. For deployment, choose from ''create'', ''validate'', ''whatIf''. For deploymentStack, choose from ''create'', ''delete'', ''validate''."
+    description: "Specifies the operation to perform. For deployment, choose from 'create', 'validate', 'whatIf'. For deploymentStack, choose from 'create', 'delete', 'validate'."
     required: true
 
   name:
@@ -18,7 +18,7 @@ inputs:
     required: true
 
   scope:
-    description: "Specifies the scope of the deployment or deploymentStack. For deployment, choose from ''resourceGroup'', ''subscription'', ''managementGroup'', ''tenant''. For deploymentStack, choose from ''resourceGroup'', ''subscription'', ''managementGroup''."
+    description: "Specifies the scope of the deployment or deploymentStack. For deployment, choose from 'resourceGroup', 'subscription', 'managementGroup', 'tenant'. For deploymentStack, choose from 'resourceGroup', 'subscription', 'managementGroup'."
     required: true
   tenant-id:
     description: "Specifies the tenant ID."
@@ -48,20 +48,20 @@ inputs:
     required: false
 
   what-if-exclude-change-type:
-    description: "Specifies the change type to exclude from the "What If" operation."
+    description: "Specifies the change type to exclude from the 'What If' operation."
     required: false
 
   action-on-unmanage-resources:
-    description: "Specifies the action to take on unmanaged resources. Choose from ''delete'' or ''detach''."
+    description: "Specifies the action to take on unmanaged resources. Choose from 'delete' or 'detach'."
     required: false
   action-on-unmanage-resourcegroups:
-    description: "Specifies the action to take on unmanaged resource groups. Choose from ''delete'' or ''detach''."
+    description: "Specifies the action to take on unmanaged resource groups. Choose from 'delete' or 'detach'."
     required: false
   action-on-unmanage-managementgroup:
-    description: "Specifies the action to take on unmanaged management groups. Choose from ''delete'' or ''detach''."
+    description: "Specifies the action to take on unmanaged management groups. Choose from 'delete' or 'detach'."
     required: false
   deny-settings-mode:
-    description: "Specifies the mode of the deny settings. Choose from ''denyDelete'', ''denyWriteAndDelete'', ''none''."
+    description: "Specifies the mode of the deny settings. Choose from 'denyDelete', 'denyWriteAndDelete', 'none'."
     required: false
   deny-settings-excluded-action:
     description: "Specifies the excluded action for the deny settings."
@@ -70,7 +70,7 @@ inputs:
     description: "Specifies the excluded principals for the deny settings."
     required: false
   bypass-stack-out-of-sync-error:
-    description: "Specifies whether to bypass the stack out of sync error. Choose from ''true'' or ''false''."
+    description: "Specifies whether to bypass the stack out of sync error. Choose from 'true' or 'false'."
     required: false
 
   description:
