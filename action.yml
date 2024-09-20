@@ -7,18 +7,18 @@ inputs:
     description: "Specifies the execution type, which can be either 'deployment' or 'deploymentStack'."
     required: true
   operation:
-    description: "Specifies the operation to perform. For deployment, choose from 'create', 'validate', 'whatIf'. For deploymentStack, choose from 'create', 'delete', 'whatIf'."
+    description: "Specifies the operation to perform. For deployment, choose from 'create', 'validate', 'whatIf'. For deploymentStack, choose from 'create', 'delete', 'validate'."
     required: true
 
   name:
-    description: "Specifies the name of the deployment or the deploymentStack."
+    description: "Specifies the name of the deployment or deploymentStack."
     required: true
   location:
-    description: "Specifies the location of the deployment or the deploymentStack."
+    description: "Specifies the location of the deployment or deploymentStack."
     required: true
 
   scope:
-    description: "Specifies the scope of the deployment or the deploymentStack. For deployment, choose from 'resourceGroup', 'subscription', 'managementGroup', 'tenant'. For deploymentStack, choose from 'resourceGroup', 'subscription', 'managementGroup'."
+    description: "Specifies the scope of the deployment or deploymentStack. For deployment, choose from 'resourceGroup', 'subscription', 'managementGroup', 'tenant'. For deploymentStack, choose from 'resourceGroup', 'subscription', 'managementGroup'."
     required: true
   tenant-id:
     description: "Specifies the tenant ID."
@@ -47,18 +47,9 @@ inputs:
     description: "Specifies the path to the parameters file."
     required: false
 
-  what-if:
-    description: ""
-    required: false
-    default: ""
   what-if-exclude-change-type:
-    description: ""
+    description: "Specifies the change type to exclude from the "What If" operation."
     required: false
-    default: ""
-  what-if-result-format:
-    description: ""
-    required: false
-    default: ""
 
   action-on-unmanage-resources:
     description: "Specifies the action to take on unmanaged resources. Choose from 'delete' or 'detach'."
