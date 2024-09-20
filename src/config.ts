@@ -9,6 +9,7 @@ import {
   getOptionalEnumInput,
   getOptionalStringArrayInput,
   getRequiredStringInput,
+  getOptionalEnumArrayInput,
 } from "./helpers/input";
 
 type CommonScope = {
@@ -48,6 +49,15 @@ type CommonConfig = {
   tags?: Record<string, string>;
 } & FileConfig;
 
+type WhatIfChangeType =
+  | "create"
+  | "delete"
+  | "modify"
+  | "deploy"
+  | "noChange"
+  | "ignore"
+  | "unsupported";
+
 export type DeploymentsConfig = CommonConfig & {
   type: "deployment";
   operation: "create" | "validate" | "whatIf";
@@ -56,6 +66,9 @@ export type DeploymentsConfig = CommonConfig & {
     | ManagementGroupScope
     | SubscriptionScope
     | ResourceGroupScope;
+  whatIf: {
+    excludeChangeTypes: WhatIfChangeType[];
+  };
 };
 
 export type DeploymentStackConfig = CommonConfig & {
@@ -102,6 +115,20 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
           "whatIf",
         ]),
         scope: parseDeploymentScope(),
+        whatIf: {
+          excludeChangeTypes: getOptionalEnumArrayInput(
+            "what-if-exclude-change-types",
+            [
+              "create",
+              "delete",
+              "modify",
+              "deploy",
+              "noChange",
+              "ignore",
+              "unsupported",
+            ],
+          ),
+        },
       };
     }
     case "deploymentStack": {

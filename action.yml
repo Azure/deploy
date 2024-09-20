@@ -47,15 +47,7 @@ inputs:
     description: ''
     required: false
 
-  what-if:
-    description: ''
-    required: false
-    default: ''
-  what-if-exclude-change-type:
-    description: ''
-    required: false
-    default: ''
-  what-if-result-format:
+  what-if-exclude-change-types:
     description: ''
     required: false
     default: ''

@@ -19,7 +19,7 @@ export type ParsedFiles = {
 async function compileBicepParams(paramFilePath: string) {
   const bicepPath = await Bicep.install(tmpdir());
 
-  const result = await withBicep(bicepPath, (bicep) =>
+  const result = await withBicep(bicepPath, bicep =>
     bicep.compileParams({
       path: paramFilePath,
       parameterOverrides: {},
@@ -42,7 +42,7 @@ async function compileBicepParams(paramFilePath: string) {
 async function compileBicep(templateFilePath: string) {
   const bicepPath = await Bicep.install(tmpdir());
 
-  const result = await withBicep(bicepPath, (bicep) =>
+  const result = await withBicep(bicepPath, bicep =>
     bicep.compile({
       path: templateFilePath,
     }),
