@@ -7,7 +7,7 @@ import {
   WhatIfOperationResult,
   WhatIfPropertyChange,
 } from "@azure/arm-resources";
-import { Color } from "./logging";
+import { Color, ColorMode, ColorStringBuilder } from "./logging";
 
 // ChatGPT was heavily utilized to generate this file, using the below Python code as a starting point:
 // https://github.com/Azure/azure-cli/blob/5b77a09013d0f15f01e2b2acce1efd37571ac1d9/src/azure-cli/azure/cli/command_modules/resource/_formatters.py#L84
@@ -32,7 +32,7 @@ enum Symbol {
 
 const changeTypeToColor: Record<ChangeType, Color> = {
   Create: Color.Green,
-  Delete: Color.Yellow,
+  Delete: Color.Red,
   Modify: Color.Magenta,
   Deploy: Color.Blue,
   NoChange: Color.Reset,
@@ -42,7 +42,7 @@ const changeTypeToColor: Record<ChangeType, Color> = {
 
 const propertyChangeTypeToColor: Record<PropertyChangeType, Color> = {
   Create: Color.Green,
-  Delete: Color.Yellow,
+  Delete: Color.Red,
   Modify: Color.Magenta,
   Array: Color.Magenta,
   NoEffect: Color.White,
@@ -92,46 +92,17 @@ const propertyChangeToChangeType: Record<PropertyChangeType, ChangeType> = {
   NoEffect: "NoChange",
 };
 
-class StringBuilder {
-  private buffer: string = "";
-  constructor(private enableColor: boolean) {}
-
-  append(value: string, color?: Color): this {
-    if (color) {
-      this.withColorScope(color, () => {
-        this.buffer += value;
-      });
-    } else {
-      this.buffer += value;
-    }
-    return this;
-  }
-
-  appendLine(value: string = ""): this {
-    this.append(value + "\n");
-    return this;
-  }
-
-  withColorScope(color: Color, action: () => void): void {
-    if (this.enableColor) {
-      this.append(color);
-    }
-    action();
-    if (this.enableColor) {
-      this.append(Color.Reset);
-    }
-  }
-
-  build(): string {
-    return this.buffer;
-  }
+export function formatJson(value: UnknownValue, colorMode: ColorMode): string {
+  const builder = new ColorStringBuilder(colorMode);
+  formatJsonValue(builder, value);
+  return builder.build();
 }
 
 export function formatWhatIfOperationResult(
   whatIfOperationResult: WhatIfOperationResult,
-  enableColor = true,
+  colorMode: ColorMode,
 ): string {
-  const builder = new StringBuilder(enableColor);
+  const builder = new ColorStringBuilder(colorMode);
   formatNoiseNotice(builder);
   formatChangeTypeLegend(builder, whatIfOperationResult.changes ?? []);
   formatResourceChanges(builder, whatIfOperationResult.changes ?? []);
@@ -139,14 +110,14 @@ export function formatWhatIfOperationResult(
   return builder.build();
 }
 
-function formatNoiseNotice(builder: StringBuilder): void {
+function formatNoiseNotice(builder: ColorStringBuilder): void {
   builder.appendLine(`Note: The result may contain false positive predictions (noise).
 You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues`);
   builder.appendLine();
 }
 
 function formatChangeTypeLegend(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   resourceChanges: WhatIfChange[],
 ): void {
   if (!resourceChanges.length) return;
@@ -191,7 +162,7 @@ function formatChangeTypeLegend(
 }
 
 function formatResourceChangesStats(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   resourceChanges: WhatIfChange[],
 ): void {
   builder.appendLine().append("Resource changes: ");
@@ -241,7 +212,7 @@ function formatChangeTypeCount(changeType: ChangeType, count: number): string {
 }
 
 function formatResourceChanges(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   resourceChanges: WhatIfChange[],
 ): void {
   if (!resourceChanges.length) return;
@@ -259,15 +230,14 @@ function formatResourceChanges(
     `The deployment will update the following ${numScopes === 1 ? "scope:" : "scopes:"}`,
   );
 
-  for (const [scope, resourceChangesInScope] of entries(
-    resourceChangesByScope,
-  )) {
+  for (const [, resourceChangesInScope] of entries(resourceChangesByScope)) {
+    const scope = getScope(resourceChangesInScope[0]);
     formatResourceChangesInScope(builder, scope, resourceChangesInScope);
   }
 }
 
 function formatResourceChangesInScope(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   scope: string,
   resourceChangesInScope: WhatIfChange[],
 ): void {
@@ -292,7 +262,7 @@ function formatResourceChangesInScope(
 }
 
 function formatResourceChange(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   resourceChange: WhatIfChange,
   isLast: boolean,
 ): void {
@@ -304,21 +274,14 @@ function formatResourceChange(
   formatResourceChangePath(builder, changeType, relativeResourceId, apiVersion);
 
   if (changeType === "Create" && resourceChange.after) {
-    formatJsonValue(builder, resourceChange.after, "", 2);
+    formatJsonValue(builder, resourceChange.after, undefined, undefined, 2);
   } else if (changeType === "Delete" && resourceChange.before) {
-    formatJsonValue(builder, resourceChange.before, "", 2);
+    formatJsonValue(builder, resourceChange.before, undefined, undefined, 2);
   } else if (resourceChange.delta) {
     const delta = resourceChange.delta;
     builder.withColorScope(Color.Reset, () => {
       builder.appendLine();
-      formatPropertyChanges(
-        builder,
-        delta.sort(
-          (a, b) =>
-            propertyChangeTypeToWeight[a.propertyChangeType] -
-            propertyChangeTypeToWeight[b.propertyChangeType],
-        ),
-      );
+      formatPropertyChanges(builder, sortChanges(delta));
     });
   } else if (isLast) {
     builder.appendLine();
@@ -326,7 +289,7 @@ function formatResourceChange(
 }
 
 function formatResourceChangePath(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   changeType: ChangeType,
   resourceChangeId: string,
   apiVersion?: string,
@@ -342,7 +305,7 @@ function formatResourceChangePath(
 }
 
 function formatResourceChangeType(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   changeType: ChangeType,
 ): void {
   const changeSymbol = changeTypeToSymbol[changeType];
@@ -350,7 +313,7 @@ function formatResourceChangeType(
 }
 
 function formatResourceChangeApiVersion(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   apiVersion?: string,
 ): void {
   if (!apiVersion) return;
@@ -364,7 +327,7 @@ function formatResourceChangeApiVersion(
 }
 
 function formatPropertyChanges(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   propertyChanges: WhatIfPropertyChange[],
   indentLevel: number = 2,
 ): void {
@@ -377,7 +340,7 @@ function formatPropertyChanges(
 }
 
 function formatPropertyChange(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   propertyChange: WhatIfPropertyChange,
   maxPathLength: number,
   indentLevel: number,
@@ -449,7 +412,7 @@ function formatPropertyChange(
 }
 
 function formatPropertyChangePath(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   propertyChange: WhatIfPropertyChange,
   value: UnknownValue,
   maxPathLength: number,
@@ -481,7 +444,7 @@ function formatPropertyChangePath(
 }
 
 function formatPropertyChangeType(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   propertyChangeType: PropertyChangeType,
 ): void {
   const propertyChangeSymbol = propertyChangeTypeToSymbol[propertyChangeType];
@@ -492,7 +455,7 @@ function formatPropertyChangeType(
 }
 
 function formatPropertyNoEffect(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   value: UnknownValue,
   indentLevel: number,
 ): void {
@@ -502,7 +465,7 @@ function formatPropertyNoEffect(
 }
 
 function formatPropertyCreate(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   value: UnknownValue,
   indentLevel: number,
 ): void {
@@ -512,7 +475,7 @@ function formatPropertyCreate(
 }
 
 function formatPropertyDelete(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   value: UnknownValue,
   indentLevel: number,
 ): void {
@@ -522,21 +485,16 @@ function formatPropertyDelete(
 }
 
 function formatPropertyModify(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   before: UnknownValue,
   after: UnknownValue,
   children: WhatIfPropertyChange[],
   indentLevel: number,
 ): void {
-  if (children) {
+  if (children && children.length > 0) {
     // Has nested changes.
     builder.appendLine().appendLine();
-    formatPropertyChanges(
-      builder,
-      // TODO is this implemented correctly?
-      sortBy(children, x => propertyChangeTypeToWeight[x.propertyChangeType]),
-      indentLevel,
-    );
+    formatPropertyChanges(builder, sortChanges(children), indentLevel);
   } else {
     formatPropertyDelete(builder, before, indentLevel);
 
@@ -564,7 +522,7 @@ function formatPropertyModify(
 }
 
 function formatPropertyArrayChange(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   parentPropertyChange: WhatIfPropertyChange,
   propertyChanges: WhatIfPropertyChange[],
   indentLevel: number,
@@ -584,15 +542,7 @@ function formatPropertyArrayChange(
   // [
   builder.append(Symbol.LeftSquareBracket).appendLine();
 
-  formatPropertyChanges(
-    builder,
-    // TODO is this implemented correctly?
-    sortBy(
-      propertyChanges,
-      x => propertyChangeTypeToWeight[x.propertyChangeType],
-    ),
-    indentLevel,
-  );
+  formatPropertyChanges(builder, sortChanges(propertyChanges), indentLevel);
 
   // ]
   formatIndent(builder, indentLevel);
@@ -654,7 +604,7 @@ function shouldConsiderPropertyChangePath(
 }
 
 function formatJsonValue(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   value: UnknownValue,
   path: string = "",
   maxPathLength: number = 0,
@@ -673,20 +623,24 @@ function formatJsonValue(
   }
 }
 
-function formatLeaf(builder: StringBuilder, value: UnknownValue): void {
+function formatLeaf(builder: ColorStringBuilder, value: UnknownValue): void {
   if (value === null) {
     builder.append("null");
   } else if (typeof value === "boolean") {
     builder.append(String(value).toLowerCase());
   } else if (typeof value === "string") {
     builder.append(Symbol.Quote).append(value).append(Symbol.Quote);
+  } else if (Array.isArray(value) && value.length === 0) {
+    builder.append("[]");
+  } else if (typeof value === "object") {
+    builder.append("{}");
   } else {
     builder.append(String(value));
   }
 }
 
 function formatNonEmptyArray(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   value: UnknownValue[],
   indentLevel: number,
 ): void {
@@ -724,7 +678,7 @@ function formatNonEmptyArray(
 }
 
 function formatNonEmptyObject(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   value: Record<string, UnknownValue>,
   path: string = "",
   maxPathLength: number = 0,
@@ -758,7 +712,7 @@ function formatNonEmptyObject(
 }
 
 function formatJsonPath(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   path: string,
   paddingWidth: number,
   indentLevel: number,
@@ -767,12 +721,12 @@ function formatJsonPath(
 }
 
 function formatPath(
-  builder: StringBuilder,
+  builder: ColorStringBuilder,
   path: string,
   paddingWidth: number,
   indentLevel: number,
-  formatHead?: (builder: StringBuilder) => void,
-  formatTail?: (builder: StringBuilder) => void,
+  formatHead?: (builder: ColorStringBuilder) => void,
+  formatTail?: (builder: ColorStringBuilder) => void,
 ): void {
   if (!path) return;
 
@@ -791,11 +745,14 @@ function formatPath(
   builder.append(" ".repeat(paddingWidth));
 }
 
-function formatColon(builder: StringBuilder): void {
+function formatColon(builder: ColorStringBuilder): void {
   builder.append(Symbol.Colon, Color.Reset);
 }
 
-function formatIndent(builder: StringBuilder, indentLevel: number = 1): void {
+function formatIndent(
+  builder: ColorStringBuilder,
+  indentLevel: number = 1,
+): void {
   builder.append(" ".repeat(2 * indentLevel));
 }
 
@@ -834,6 +791,7 @@ function getMaxPathLengthFromObject(
 function isLeaf(value: UnknownValue): boolean {
   return (
     value === null ||
+    value === undefined ||
     typeof value === "boolean" ||
     typeof value === "number" ||
     typeof value === "string" ||
@@ -854,6 +812,17 @@ function isNonEmptyObject(
   );
 }
 
+function sortChanges(changes: WhatIfPropertyChange[]) {
+  return changes
+    .slice()
+    .sort(
+      (a, b) =>
+        propertyChangeTypeToWeight[a.propertyChangeType] -
+          propertyChangeTypeToWeight[b.propertyChangeType] ||
+        a.path.localeCompare(b.path),
+    );
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function groupBy<K extends keyof any, T>(
   array: T[],
@@ -869,25 +838,23 @@ function groupBy<K extends keyof any, T>(
   );
 }
 
-function sortBy<T>(array: T[], getWeight: (item: T) => number): T[] {
-  return array.slice().sort((a, b) => getWeight(a) - getWeight(b));
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function entries<K extends keyof any, T>(record: Record<K, T>): [K, T][] {
-  return entries(record) as [K, T][];
+  return Object.entries(record) as [K, T][];
 }
 
 function splitResourceId(resourceId: string): [string, string] {
   const providers = "/providers/";
   const providersIndex = resourceId.lastIndexOf(providers);
   if (providersIndex === -1) {
-    const rgMatches = resourceId.matchAll(
-      /^(\/subscriptions\/[^/]+)\/(resourceGroups\/[^/]+)$/i,
-    );
-    if (rgMatches) {
-      const matchesArray = [...rgMatches];
-      return [matchesArray[1][0], matchesArray[2][0]];
+    const rgMatches = [
+      ...resourceId.matchAll(
+        /^(\/subscriptions\/[^/]+)\/(resourceGroups\/[^/]+)$/gi,
+      ),
+    ];
+
+    if (rgMatches[0]) {
+      return [rgMatches[0][1], rgMatches[0][2]];
     }
 
     return ["/", resourceId.substring(1)];

@@ -81,7 +81,7 @@ export async function execute(config: ActionConfig, files: ParsedFiles) {
           }
           case "whatIf": {
             const result = await deploymentWhatIf(config, files);
-            const formatted = formatWhatIfOperationResult(result);
+            const formatted = formatWhatIfOperationResult(result, "ansii");
             logInfoRaw(formatted);
             break;
           }
