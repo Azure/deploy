@@ -23,7 +23,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --config jest.config.unit.ts",
+    "test:live": "jest --config jest.config.live.ts",
     "package": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "lint": "eslint src --ext ts",
     "lint:fix": "eslint src --ext ts --fix"
@@ -52,6 +53,7 @@
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "yaml": "^2.5.1"
   }
 }

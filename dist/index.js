@@ -58127,19 +58127,10 @@ function parseDeploymentStackScope() {
 /***/ }),
 
 /***/ 8502:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.execute = execute;
 // Copyright (c) Microsoft Corporation.
@@ -58164,80 +58155,75 @@ function getStacksClient(scope) {
     const { tenantId, subscriptionId } = scope;
     return (0, azure_1.createStacksClient)(subscriptionId, tenantId);
 }
-function execute(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        try {
-            switch (config.type) {
-                case "deployment": {
-                    switch (config.operation) {
-                        case "create": {
-                            yield tryWithErrorHandling(() => __awaiter(this, void 0, void 0, function* () {
-                                var _a;
-                                const result = yield deploymentCreate(config, files);
-                                setCreateOutputs((_a = result === null || result === void 0 ? void 0 : result.properties) === null || _a === void 0 ? void 0 : _a.outputs);
-                            }), error => {
-                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
-                                (0, core_1.setFailed)("Create failed");
-                            });
-                            break;
-                        }
-                        case "validate": {
-                            yield tryWithErrorHandling(() => deploymentValidate(config, files), error => {
-                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
-                                (0, core_1.setFailed)("Validation failed");
-                            });
-                            break;
-                        }
-                        case "whatIf": {
-                            const result = yield deploymentWhatIf(config, files);
-                            const formatted = (0, whatif_1.formatWhatIfOperationResult)(result);
-                            (0, logging_1.logInfoRaw)(formatted);
-                            break;
-                        }
+async function execute(config, files) {
+    try {
+        switch (config.type) {
+            case "deployment": {
+                switch (config.operation) {
+                    case "create": {
+                        await tryWithErrorHandling(async () => {
+                            const result = await deploymentCreate(config, files);
+                            setCreateOutputs(result?.properties?.outputs);
+                        }, error => {
+                            (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                            (0, core_1.setFailed)("Create failed");
+                        });
+                        break;
                     }
-                    break;
-                }
-                case "deploymentStack": {
-                    switch (config.operation) {
-                        case "create": {
-                            yield tryWithErrorHandling(() => __awaiter(this, void 0, void 0, function* () {
-                                var _a;
-                                const result = yield stackCreate(config, files);
-                                setCreateOutputs((_a = result === null || result === void 0 ? void 0 : result.properties) === null || _a === void 0 ? void 0 : _a.outputs);
-                            }), error => {
-                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
-                                (0, core_1.setFailed)("Create failed");
-                            });
-                            break;
-                        }
-                        case "validate": {
-                            yield tryWithErrorHandling(() => stackValidate(config, files), error => {
-                                (0, logging_1.logError)(JSON.stringify(error, null, 2));
-                                (0, core_1.setFailed)("Validation failed");
-                            });
-                            break;
-                        }
-                        case "delete": {
-                            yield stackDelete(config);
-                            break;
-                        }
+                    case "validate": {
+                        await tryWithErrorHandling(() => deploymentValidate(config, files), error => {
+                            (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                            (0, core_1.setFailed)("Validation failed");
+                        });
+                        break;
                     }
-                    break;
+                    case "whatIf": {
+                        const result = await deploymentWhatIf(config, files);
+                        const formatted = (0, whatif_1.formatWhatIfOperationResult)(result, "ansii");
+                        (0, logging_1.logInfoRaw)(formatted);
+                        break;
+                    }
                 }
+                break;
+            }
+            case "deploymentStack": {
+                switch (config.operation) {
+                    case "create": {
+                        await tryWithErrorHandling(async () => {
+                            const result = await stackCreate(config, files);
+                            setCreateOutputs(result?.properties?.outputs);
+                        }, error => {
+                            (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                            (0, core_1.setFailed)("Create failed");
+                        });
+                        break;
+                    }
+                    case "validate": {
+                        await tryWithErrorHandling(() => stackValidate(config, files), error => {
+                            (0, logging_1.logError)(JSON.stringify(error, null, 2));
+                            (0, core_1.setFailed)("Validation failed");
+                        });
+                        break;
+                    }
+                    case "delete": {
+                        await stackDelete(config);
+                        break;
+                    }
+                }
+                break;
             }
         }
-        catch (error) {
-            if (error instanceof core_rest_pipeline_1.RestError && ((_a = error.response) === null || _a === void 0 ? void 0 : _a.bodyAsText)) {
-                const correlationId = error.response.headers.get("x-ms-correlation-request-id");
-                (0, logging_1.logError)(`Request failed. CorrelationId: ${correlationId}`);
-                const responseBody = JSON.parse(error.response.bodyAsText);
-                (0, logging_1.logError)(JSON.stringify(responseBody, null, 2));
-            }
-            (0, core_1.setFailed)("Operation failed");
-            throw error;
+    }
+    catch (error) {
+        if (error instanceof core_rest_pipeline_1.RestError && error.response?.bodyAsText) {
+            const correlationId = error.response.headers.get("x-ms-correlation-request-id");
+            (0, logging_1.logError)(`Request failed. CorrelationId: ${correlationId}`);
+            const responseBody = JSON.parse(error.response.bodyAsText);
+            (0, logging_1.logError)(JSON.stringify(responseBody, null, 2));
         }
-    });
+        (0, core_1.setFailed)("Operation failed");
+        throw error;
+    }
 }
 function setCreateOutputs(outputs) {
     if (!outputs) {
@@ -58248,62 +58234,80 @@ function setCreateOutputs(outputs) {
         (0, core_1.setOutput)(key, output.value);
     }
 }
-function deploymentCreate(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
-        const scope = config.scope;
-        const client = getDeploymentClient(scope);
-        const deployment = getDeployment(config, files);
-        switch (scope.type) {
-            case "resourceGroup":
-                return yield client.deployments.beginCreateOrUpdateAndWait(scope.resourceGroup, name, deployment);
-            case "subscription":
-                return yield client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-            case "managementGroup":
-                return yield client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-            case "tenant":
-                yield client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-        }
-    });
+async function deploymentCreate(config, files) {
+    const name = config.name ?? defaultName;
+    const scope = config.scope;
+    const client = getDeploymentClient(scope);
+    const deployment = getDeployment(config, files);
+    switch (scope.type) {
+        case "resourceGroup":
+            return await client.deployments.beginCreateOrUpdateAndWait(scope.resourceGroup, name, deployment);
+        case "subscription":
+            return await client.deployments.beginCreateOrUpdateAtSubscriptionScopeAndWait(name, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+        case "managementGroup":
+            return await client.deployments.beginCreateOrUpdateAtManagementGroupScopeAndWait(scope.managementGroup, name, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+        case "tenant":
+            await client.deployments.beginCreateOrUpdateAtTenantScopeAndWait(name, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+    }
 }
-function deploymentValidate(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
-        const scope = config.scope;
-        const client = getDeploymentClient(scope);
-        const deployment = getDeployment(config, files);
-        switch (scope.type) {
-            case "resourceGroup":
-                return yield client.deployments.beginValidateAndWait(scope.resourceGroup, name, deployment);
-            case "subscription":
-                return yield client.deployments.beginValidateAtSubscriptionScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-            case "managementGroup":
-                return yield client.deployments.beginValidateAtManagementGroupScopeAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-            case "tenant":
-                yield client.deployments.beginValidateAtTenantScopeAndWait(name, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-        }
-    });
+async function deploymentValidate(config, files) {
+    const name = config.name ?? defaultName;
+    const scope = config.scope;
+    const client = getDeploymentClient(scope);
+    const deployment = getDeployment(config, files);
+    switch (scope.type) {
+        case "resourceGroup":
+            return await client.deployments.beginValidateAndWait(scope.resourceGroup, name, deployment);
+        case "subscription":
+            return await client.deployments.beginValidateAtSubscriptionScopeAndWait(name, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+        case "managementGroup":
+            return await client.deployments.beginValidateAtManagementGroupScopeAndWait(scope.managementGroup, name, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+        case "tenant":
+            await client.deployments.beginValidateAtTenantScopeAndWait(name, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+    }
 }
-function deploymentWhatIf(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const deploymentName = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
-        const scope = config.scope;
-        const client = getDeploymentClient(scope);
-        const deployment = getDeployment(config, files);
-        switch (scope.type) {
-            case "resourceGroup":
-                return yield client.deployments.beginWhatIfAndWait(scope.resourceGroup, deploymentName, deployment);
-            case "subscription":
-                return yield client.deployments.beginWhatIfAtSubscriptionScopeAndWait(deploymentName, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-            case "managementGroup":
-                return yield client.deployments.beginWhatIfAtManagementGroupScopeAndWait(scope.managementGroup, deploymentName, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-            case "tenant":
-                return yield client.deployments.beginWhatIfAtTenantScopeAndWait(deploymentName, Object.assign(Object.assign({}, deployment), { location: requireLocation(config) }));
-        }
-    });
+async function deploymentWhatIf(config, files) {
+    const deploymentName = config.name ?? defaultName;
+    const scope = config.scope;
+    const client = getDeploymentClient(scope);
+    const deployment = getDeployment(config, files);
+    switch (scope.type) {
+        case "resourceGroup":
+            return await client.deployments.beginWhatIfAndWait(scope.resourceGroup, deploymentName, deployment);
+        case "subscription":
+            return await client.deployments.beginWhatIfAtSubscriptionScopeAndWait(deploymentName, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+        case "managementGroup":
+            return await client.deployments.beginWhatIfAtManagementGroupScopeAndWait(scope.managementGroup, deploymentName, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+        case "tenant":
+            return await client.deployments.beginWhatIfAtTenantScopeAndWait(deploymentName, {
+                ...deployment,
+                location: requireLocation(config),
+            });
+    }
 }
 function getDeployment(config, files) {
     const { templateContents, templateSpecId, parametersContents } = files;
@@ -58325,55 +58329,58 @@ function getDeployment(config, files) {
         tags: config.tags,
     };
 }
-function stackCreate(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
-        const scope = config.scope;
-        const client = getStacksClient(scope);
-        const stack = getStack(config, files);
-        switch (scope.type) {
-            case "resourceGroup":
-                return yield client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(scope.resourceGroup, name, stack);
-            case "subscription":
-                return yield client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
-            case "managementGroup":
-                return yield client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
-        }
-    });
+async function stackCreate(config, files) {
+    const name = config.name ?? defaultName;
+    const scope = config.scope;
+    const client = getStacksClient(scope);
+    const stack = getStack(config, files);
+    switch (scope.type) {
+        case "resourceGroup":
+            return await client.deploymentStacks.beginCreateOrUpdateAtResourceGroupAndWait(scope.resourceGroup, name, stack);
+        case "subscription":
+            return await client.deploymentStacks.beginCreateOrUpdateAtSubscriptionAndWait(name, {
+                ...stack,
+                location: requireLocation(config),
+            });
+        case "managementGroup":
+            return await client.deploymentStacks.beginCreateOrUpdateAtManagementGroupAndWait(scope.managementGroup, name, {
+                ...stack,
+                location: requireLocation(config),
+            });
+    }
 }
-function stackValidate(config, files) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
-        const scope = config.scope;
-        const client = getStacksClient(scope);
-        const stack = getStack(config, files);
-        switch (scope.type) {
-            case "resourceGroup":
-                return yield client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(scope.resourceGroup, name, stack);
-            case "subscription":
-                return yield client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
-            case "managementGroup":
-                return yield client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(scope.managementGroup, name, Object.assign(Object.assign({}, stack), { location: requireLocation(config) }));
-        }
-    });
+async function stackValidate(config, files) {
+    const name = config.name ?? defaultName;
+    const scope = config.scope;
+    const client = getStacksClient(scope);
+    const stack = getStack(config, files);
+    switch (scope.type) {
+        case "resourceGroup":
+            return await client.deploymentStacks.beginValidateStackAtResourceGroupAndWait(scope.resourceGroup, name, stack);
+        case "subscription":
+            return await client.deploymentStacks.beginValidateStackAtSubscriptionAndWait(name, {
+                ...stack,
+                location: requireLocation(config),
+            });
+        case "managementGroup":
+            return await client.deploymentStacks.beginValidateStackAtManagementGroupAndWait(scope.managementGroup, name, {
+                ...stack,
+                location: requireLocation(config),
+            });
+    }
 }
-function stackDelete(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const name = (_a = config.name) !== null && _a !== void 0 ? _a : defaultName;
-        const scope = config.scope;
-        const client = getStacksClient(scope);
-        switch (scope.type) {
-            case "resourceGroup":
-                return yield client.deploymentStacks.beginDeleteAtResourceGroupAndWait(scope.resourceGroup, name);
-            case "subscription":
-                return yield client.deploymentStacks.beginDeleteAtSubscriptionAndWait(name);
-            case "managementGroup":
-                return yield client.deploymentStacks.beginDeleteAtManagementGroupAndWait(scope.managementGroup, name);
-        }
-    });
+async function stackDelete(config) {
+    const name = config.name ?? defaultName;
+    const scope = config.scope;
+    const client = getStacksClient(scope);
+    switch (scope.type) {
+        case "resourceGroup":
+            return await client.deploymentStacks.beginDeleteAtResourceGroupAndWait(scope.resourceGroup, name);
+        case "subscription":
+            return await client.deploymentStacks.beginDeleteAtSubscriptionAndWait(name);
+        case "managementGroup":
+            return await client.deploymentStacks.beginDeleteAtManagementGroupAndWait(scope.managementGroup, name);
+    }
 }
 function getStack(config, files) {
     const { templateContents, templateSpecId, parametersContents } = files;
@@ -58402,25 +58409,22 @@ function requireLocation(config) {
     }
     return config.location;
 }
-function tryWithErrorHandling(action, onError) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        try {
-            return yield action();
-        }
-        catch (ex) {
-            if (ex instanceof core_rest_pipeline_1.RestError) {
-                const correlationId = (_a = ex.response) === null || _a === void 0 ? void 0 : _a.headers.get("x-ms-correlation-request-id");
-                (0, logging_1.logError)(`Request failed. CorrelationId: ${correlationId}`);
-                const { error } = ex.details;
-                if (error) {
-                    onError(error);
-                    return;
-                }
+async function tryWithErrorHandling(action, onError) {
+    try {
+        return await action();
+    }
+    catch (ex) {
+        if (ex instanceof core_rest_pipeline_1.RestError) {
+            const correlationId = ex.response?.headers.get("x-ms-correlation-request-id");
+            (0, logging_1.logError)(`Request failed. CorrelationId: ${correlationId}`);
+            const { error } = ex.details;
+            if (error) {
+                onError(error);
+                return;
             }
-            throw ex;
         }
-    });
+        throw ex;
+    }
 }
 
 
@@ -58487,15 +58491,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getTemplateAndParameters = getTemplateAndParameters;
 exports.parse = parse;
@@ -58507,64 +58502,58 @@ const path = __importStar(__nccwpck_require__(1017));
 const bicep_node_1 = __nccwpck_require__(837);
 const os_1 = __nccwpck_require__(2037);
 const logging_1 = __nccwpck_require__(6679);
-function compileBicepParams(paramFilePath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
-        const result = yield withBicep(bicepPath, bicep => bicep.compileParams({
-            path: paramFilePath,
-            parameterOverrides: {},
-        }));
-        logDiagnostics(result.diagnostics);
-        if (!result.success) {
-            throw `Failed to compile Bicep parameters file: ${paramFilePath}`;
-        }
-        return {
-            parameters: result.parameters,
-            template: result.template,
-            templateSpecId: result.templateSpecId,
-        };
-    });
+async function compileBicepParams(paramFilePath) {
+    const bicepPath = await bicep_node_1.Bicep.install((0, os_1.tmpdir)());
+    const result = await withBicep(bicepPath, bicep => bicep.compileParams({
+        path: paramFilePath,
+        parameterOverrides: {},
+    }));
+    logDiagnostics(result.diagnostics);
+    if (!result.success) {
+        throw `Failed to compile Bicep parameters file: ${paramFilePath}`;
+    }
+    return {
+        parameters: result.parameters,
+        template: result.template,
+        templateSpecId: result.templateSpecId,
+    };
 }
-function compileBicep(templateFilePath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const bicepPath = yield bicep_node_1.Bicep.install((0, os_1.tmpdir)());
-        const result = yield withBicep(bicepPath, bicep => bicep.compile({
-            path: templateFilePath,
-        }));
-        logDiagnostics(result.diagnostics);
-        if (!result.success) {
-            throw `Failed to compile Bicep file: ${templateFilePath}`;
-        }
-        return { template: result.contents };
-    });
+async function compileBicep(templateFilePath) {
+    const bicepPath = await bicep_node_1.Bicep.install((0, os_1.tmpdir)());
+    const result = await withBicep(bicepPath, bicep => bicep.compile({
+        path: templateFilePath,
+    }));
+    logDiagnostics(result.diagnostics);
+    if (!result.success) {
+        throw `Failed to compile Bicep file: ${templateFilePath}`;
+    }
+    return { template: result.contents };
 }
-function getTemplateAndParameters(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { parametersFile, templateFile } = config;
-        if (parametersFile &&
-            path.extname(parametersFile).toLowerCase() === ".bicepparam") {
-            return parse(yield compileBicepParams(parametersFile));
-        }
-        if (parametersFile &&
-            path.extname(parametersFile).toLowerCase() !== ".json") {
-            throw new Error(`Unsupported parameters file type: ${parametersFile}`);
-        }
-        const parameters = parametersFile
-            ? yield fs.readFile(parametersFile, "utf8")
-            : undefined;
-        if (templateFile && path.extname(templateFile).toLowerCase() === ".bicep") {
-            const { template } = yield compileBicep(templateFile);
-            return parse({ template, parameters });
-        }
-        if (templateFile && path.extname(templateFile).toLowerCase() !== ".json") {
-            throw new Error(`Unsupported template file type: ${templateFile}`);
-        }
-        if (!templateFile) {
-            throw new Error("Template file is required");
-        }
-        const template = yield fs.readFile(templateFile, "utf8");
+async function getTemplateAndParameters(config) {
+    const { parametersFile, templateFile } = config;
+    if (parametersFile &&
+        path.extname(parametersFile).toLowerCase() === ".bicepparam") {
+        return parse(await compileBicepParams(parametersFile));
+    }
+    if (parametersFile &&
+        path.extname(parametersFile).toLowerCase() !== ".json") {
+        throw new Error(`Unsupported parameters file type: ${parametersFile}`);
+    }
+    const parameters = parametersFile
+        ? await fs.readFile(parametersFile, "utf8")
+        : undefined;
+    if (templateFile && path.extname(templateFile).toLowerCase() === ".bicep") {
+        const { template } = await compileBicep(templateFile);
         return parse({ template, parameters });
-    });
+    }
+    if (templateFile && path.extname(templateFile).toLowerCase() !== ".json") {
+        throw new Error(`Unsupported template file type: ${templateFile}`);
+    }
+    if (!templateFile) {
+        throw new Error("Template file is required");
+    }
+    const template = await fs.readFile(templateFile, "utf8");
+    return parse({ template, parameters });
 }
 function parse(input) {
     const { parameters, template, templateSpecId } = input;
@@ -58572,18 +58561,16 @@ function parse(input) {
     const templateContents = template ? JSON.parse(template) : undefined;
     return { parametersContents, templateContents, templateSpecId };
 }
-function withBicep(bicepPath, action) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const bicep = yield bicep_node_1.Bicep.initialize(bicepPath);
-        try {
-            const version = yield bicep.version();
-            (0, logging_1.logInfo)(`Installed Bicep version ${version} to ${bicepPath}`);
-            return yield action(bicep);
-        }
-        finally {
-            bicep.dispose();
-        }
-    });
+async function withBicep(bicepPath, action) {
+    const bicep = await bicep_node_1.Bicep.initialize(bicepPath);
+    try {
+        const version = await bicep.version();
+        (0, logging_1.logInfo)(`Installed Bicep version ${version} to ${bicepPath}`);
+        return await action(bicep);
+    }
+    finally {
+        bicep.dispose();
+    }
 }
 function resolvePath(fileName) {
     return path.resolve(fileName);
@@ -58740,7 +58727,7 @@ function tryParseJson(value) {
     try {
         return JSON.parse(value);
     }
-    catch (_a) {
+    catch {
         return undefined;
     }
 }
@@ -58777,13 +58764,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.logError = exports.logErrorRaw = exports.logWarning = exports.logWarningRaw = exports.logInfo = exports.logInfoRaw = exports.Color = void 0;
+exports.ColorStringBuilder = exports.logError = exports.logErrorRaw = exports.logWarning = exports.logWarningRaw = exports.logInfo = exports.logInfoRaw = exports.Color = void 0;
 exports.colorize = colorize;
+exports.removeColors = removeColors;
+exports.getColorString = getColorString;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 var Color;
 (function (Color) {
+    Color["Reset"] = "\u001B[0m";
     Color["Red"] = "\u001B[31m";
     Color["Green"] = "\u001B[32m";
     Color["Yellow"] = "\u001B[33m";
@@ -58791,13 +58781,28 @@ var Color;
     Color["Magenta"] = "\u001B[35m";
     Color["Cyan"] = "\u001B[36m";
     Color["White"] = "\u001B[37m";
-    Color["Reset"] = "\u001B[0m";
 })(Color || (exports.Color = Color = {}));
+const colorToName = {
+    "\u001b[0m": "Reset",
+    "\u001b[31m": "Red",
+    "\u001b[32m": "Green",
+    "\u001b[33m": "Yellow",
+    "\u001b[34m": "Blue",
+    "\u001b[35m": "Magenta",
+    "\u001b[36m": "Cyan",
+    "\u001b[37m": "White",
+};
 function colorize(message, color) {
     return message
         .split("\n")
         .map(line => `${color}${line}${Color.Reset}`)
         .join("\n");
+}
+function removeColors(message) {
+    for (const color in colorToName) {
+        message = message.replaceAll(color, "");
+    }
+    return message;
 }
 const logInfoRaw = (message) => core.info(message);
 exports.logInfoRaw = logInfoRaw;
@@ -58811,6 +58816,55 @@ const logErrorRaw = (message) => core.error(message);
 exports.logErrorRaw = logErrorRaw;
 const logError = (message) => (0, exports.logErrorRaw)(colorize(message, Color.Red));
 exports.logError = logError;
+function getColorString(colorMode, color) {
+    switch (colorMode) {
+        case "off":
+            return "";
+        case "ansii":
+            return color;
+        case "debug":
+            return `<${colorToName[color].toUpperCase()}>`;
+    }
+    return color;
+}
+class ColorStringBuilder {
+    constructor(colorMode) {
+        this.colorMode = colorMode;
+        this.colorStack = [];
+        this.buffer = "";
+    }
+    append(value, color) {
+        if (color) {
+            this.pushColor(color);
+        }
+        this.buffer += value;
+        if (color) {
+            this.popColor();
+        }
+        return this;
+    }
+    appendLine(value = "") {
+        return this.append(value + "\n");
+    }
+    withColorScope(color, action) {
+        this.pushColor(color);
+        action();
+        this.popColor();
+    }
+    pushColor(color) {
+        this.colorStack.push(color);
+        this.buffer += getColorString(this.colorMode, color);
+    }
+    popColor() {
+        this.colorStack.pop();
+        const prevColor = this.colorStack[this.colorStack.length - 1] ?? Color.Reset;
+        this.buffer += getColorString(this.colorMode, prevColor);
+    }
+    build() {
+        return this.buffer;
+    }
+}
+exports.ColorStringBuilder = ColorStringBuilder;
 
 
 /***/ }),
@@ -58821,6 +58875,7 @@ exports.logError = logError;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.formatJson = formatJson;
 exports.formatWhatIfOperationResult = formatWhatIfOperationResult;
 const logging_1 = __nccwpck_require__(6679);
 var Symbol;
@@ -58841,7 +58896,7 @@ var Symbol;
 })(Symbol || (Symbol = {}));
 const changeTypeToColor = {
     Create: logging_1.Color.Green,
-    Delete: logging_1.Color.Yellow,
+    Delete: logging_1.Color.Red,
     Modify: logging_1.Color.Magenta,
     Deploy: logging_1.Color.Blue,
     NoChange: logging_1.Color.Reset,
@@ -58850,7 +58905,7 @@ const changeTypeToColor = {
 };
 const propertyChangeTypeToColor = {
     Create: logging_1.Color.Green,
-    Delete: logging_1.Color.Yellow,
+    Delete: logging_1.Color.Red,
     Modify: logging_1.Color.Magenta,
     Array: logging_1.Color.Magenta,
     NoEffect: logging_1.Color.White,
@@ -58894,46 +58949,17 @@ const propertyChangeToChangeType = {
     Modify: "Modify",
     NoEffect: "NoChange",
 };
-class StringBuilder {
-    constructor(enableColor) {
-        this.enableColor = enableColor;
-        this.buffer = "";
-    }
-    append(value, color) {
-        if (color) {
-            this.withColorScope(color, () => {
-                this.buffer += value;
-            });
-        }
-        else {
-            this.buffer += value;
-        }
-        return this;
-    }
-    appendLine(value = "") {
-        this.append(value + "\n");
-        return this;
-    }
-    withColorScope(color, action) {
-        if (this.enableColor) {
-            this.append(color);
-        }
-        action();
-        if (this.enableColor) {
-            this.append(logging_1.Color.Reset);
-        }
-    }
-    build() {
-        return this.buffer;
-    }
+function formatJson(value, colorMode) {
+    const builder = new logging_1.ColorStringBuilder(colorMode);
+    formatJsonValue(builder, value);
+    return builder.build();
 }
-function formatWhatIfOperationResult(whatIfOperationResult, enableColor = true) {
-    var _a, _b, _c;
-    const builder = new StringBuilder(enableColor);
+function formatWhatIfOperationResult(whatIfOperationResult, colorMode) {
+    const builder = new logging_1.ColorStringBuilder(colorMode);
     formatNoiseNotice(builder);
-    formatChangeTypeLegend(builder, (_a = whatIfOperationResult.changes) !== null && _a !== void 0 ? _a : []);
-    formatResourceChanges(builder, (_b = whatIfOperationResult.changes) !== null && _b !== void 0 ? _b : []);
-    formatResourceChangesStats(builder, (_c = whatIfOperationResult.changes) !== null && _c !== void 0 ? _c : []);
+    formatChangeTypeLegend(builder, whatIfOperationResult.changes ?? []);
+    formatResourceChanges(builder, whatIfOperationResult.changes ?? []);
+    formatResourceChangesStats(builder, whatIfOperationResult.changes ?? []);
     return builder.build();
 }
 function formatNoiseNotice(builder) {
@@ -58942,23 +58968,21 @@ You can help us improve the accuracy of the result by opening an issue here: htt
     builder.appendLine();
 }
 function formatChangeTypeLegend(builder, resourceChanges) {
-    var _a;
     if (!resourceChanges.length)
         return;
     const changeTypeSet = new Set();
     function populateChangeTypeSet(propertyChanges) {
-        var _a;
         if (!propertyChanges.length)
             return;
         for (const propertyChange of propertyChanges) {
             const propertyChangeType = propertyChange.propertyChangeType;
             changeTypeSet.add(propertyChangeToChangeType[propertyChangeType]);
-            populateChangeTypeSet((_a = propertyChange.children) !== null && _a !== void 0 ? _a : []);
+            populateChangeTypeSet(propertyChange.children ?? []);
         }
     }
     for (const resourceChange of resourceChanges) {
         changeTypeSet.add(resourceChange.changeType);
-        populateChangeTypeSet((_a = resourceChange.delta) !== null && _a !== void 0 ? _a : []);
+        populateChangeTypeSet(resourceChange.delta ?? []);
     }
     const changeTypes = Array.from(changeTypeSet).sort((a, b) => changeTypeToWeight[a] - changeTypeToWeight[b]);
     builder.append("Resource and property changes are indicated with ");
@@ -59012,7 +59036,8 @@ function formatResourceChanges(builder, resourceChanges) {
     const resourceChangesByScope = groupBy(resourceChanges.sort((a, b) => getScopeUppercase(a).localeCompare(getScopeUppercase(b))), getScopeUppercase);
     builder.appendLine();
     builder.appendLine(`The deployment will update the following ${numScopes === 1 ? "scope:" : "scopes:"}`);
-    for (const [scope, resourceChangesInScope] of entries(resourceChangesByScope)) {
+    for (const [, resourceChangesInScope] of entries(resourceChangesByScope)) {
+        const scope = getScope(resourceChangesInScope[0]);
         formatResourceChangesInScope(builder, scope, resourceChangesInScope);
     }
 }
@@ -59037,17 +59062,16 @@ function formatResourceChange(builder, resourceChange, isLast) {
     builder.appendLine();
     formatResourceChangePath(builder, changeType, relativeResourceId, apiVersion);
     if (changeType === "Create" && resourceChange.after) {
-        formatJsonValue(builder, resourceChange.after, "", 2);
+        formatJsonValue(builder, resourceChange.after, undefined, undefined, 2);
     }
     else if (changeType === "Delete" && resourceChange.before) {
-        formatJsonValue(builder, resourceChange.before, "", 2);
+        formatJsonValue(builder, resourceChange.before, undefined, undefined, 2);
     }
     else if (resourceChange.delta) {
         const delta = resourceChange.delta;
         builder.withColorScope(logging_1.Color.Reset, () => {
             builder.appendLine();
-            formatPropertyChanges(builder, delta.sort((a, b) => propertyChangeTypeToWeight[a.propertyChangeType] -
-                propertyChangeTypeToWeight[b.propertyChangeType]));
+            formatPropertyChanges(builder, sortChanges(delta));
         });
     }
     else if (isLast) {
@@ -59148,12 +59172,10 @@ function formatPropertyDelete(builder, value, indentLevel) {
     });
 }
 function formatPropertyModify(builder, before, after, children, indentLevel) {
-    if (children) {
+    if (children && children.length > 0) {
         // Has nested changes.
         builder.appendLine().appendLine();
-        formatPropertyChanges(builder, 
-        // TODO is this implemented correctly?
-        sortBy(children, x => propertyChangeTypeToWeight[x.propertyChangeType]), indentLevel);
+        formatPropertyChanges(builder, sortChanges(children), indentLevel);
     }
     else {
         formatPropertyDelete(builder, before, indentLevel);
@@ -59189,9 +59211,7 @@ function formatPropertyArrayChange(builder, parentPropertyChange, propertyChange
     }
     // [
     builder.append(Symbol.LeftSquareBracket).appendLine();
-    formatPropertyChanges(builder, 
-    // TODO is this implemented correctly?
-    sortBy(propertyChanges, x => propertyChangeTypeToWeight[x.propertyChangeType]), indentLevel);
+    formatPropertyChanges(builder, sortChanges(propertyChanges), indentLevel);
     // ]
     formatIndent(builder, indentLevel);
     builder.append(Symbol.RightSquareBracket);
@@ -59258,6 +59278,12 @@ function formatLeaf(builder, value) {
     }
     else if (typeof value === "string") {
         builder.append(Symbol.Quote).append(value).append(Symbol.Quote);
+    }
+    else if (Array.isArray(value) && value.length === 0) {
+        builder.append("[]");
+    }
+    else if (typeof value === "object") {
+        builder.append("{}");
     }
     else {
         builder.append(String(value));
@@ -59344,6 +59370,7 @@ function getMaxPathLengthFromObject(value) {
 }
 function isLeaf(value) {
     return (value === null ||
+        value === undefined ||
         typeof value === "boolean" ||
         typeof value === "number" ||
         typeof value === "string" ||
@@ -59356,6 +59383,13 @@ function isNonEmptyArray(value) {
 function isNonEmptyObject(value) {
     return (typeof value === "object" && value !== null && Object.keys(value).length > 0);
 }
+function sortChanges(changes) {
+    return changes
+        .slice()
+        .sort((a, b) => propertyChangeTypeToWeight[a.propertyChangeType] -
+        propertyChangeTypeToWeight[b.propertyChangeType] ||
+        a.path.localeCompare(b.path));
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function groupBy(array, getKey) {
     return array.reduce((result, item) => {
@@ -59364,21 +59398,19 @@ function groupBy(array, getKey) {
         return result;
     }, {});
 }
-function sortBy(array, getWeight) {
-    return array.slice().sort((a, b) => getWeight(a) - getWeight(b));
-}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function entries(record) {
-    return entries(record);
+    return Object.entries(record);
 }
 function splitResourceId(resourceId) {
     const providers = "/providers/";
     const providersIndex = resourceId.lastIndexOf(providers);
     if (providersIndex === -1) {
-        const rgMatches = resourceId.matchAll(/^(\/subscriptions\/[^/]+)\/(resourceGroups\/[^/]+)$/i);
-        if (rgMatches) {
-            const matchesArray = [...rgMatches];
-            return [matchesArray[1][0], matchesArray[2][0]];
+        const rgMatches = [
+            ...resourceId.matchAll(/^(\/subscriptions\/[^/]+)\/(resourceGroups\/[^/]+)$/gi),
+        ];
+        if (rgMatches[0]) {
+            return [rgMatches[0][1], rgMatches[0][2]];
         }
         return ["/", resourceId.substring(1)];
     }
@@ -59419,15 +59451,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 // Copyright (c) Microsoft Corporation.
@@ -59441,20 +59464,18 @@ const logging_1 = __nccwpck_require__(6679);
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const config = (0, config_1.parseConfig)();
-            (0, logging_1.logInfo)(`Action config: ${JSON.stringify(config, null, 2)}`);
-            const files = yield (0, file_1.getTemplateAndParameters)(config);
-            yield (0, handler_1.execute)(config, files);
-        }
-        catch (error) {
-            // Fail the workflow run if an error occurs
-            if (error instanceof Error)
-                core.setFailed(error.message);
-        }
-    });
+async function run() {
+    try {
+        const config = (0, config_1.parseConfig)();
+        (0, logging_1.logInfo)(`Action config: ${JSON.stringify(config, null, 2)}`);
+        const files = await (0, file_1.getTemplateAndParameters)(config);
+        await (0, handler_1.execute)(config, files);
+    }
+    catch (error) {
+        // Fail the workflow run if an error occurs
+        if (error instanceof Error)
+            core.setFailed(error.message);
+    }
 }
 
 

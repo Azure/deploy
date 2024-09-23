@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "configurations": [
+        {
+            "name": "Run unit tests",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "test"
+            ],
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Run live tests",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "test:live"
+            ],
+            "env": {
+                "LIVETEST_SUBSCRIPTION_ID": "a1bfa635-f2bf-42f1-86b5-848c674fc321",
+                "LIVETEST_RESOURCE_GROUP": "ant-test"
+            },
+            "cwd": "${workspaceFolder}",
+        }
+    ]
+}
