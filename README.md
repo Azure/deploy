@@ -33,7 +33,7 @@ Deployment
     scope: subscription
     subscription-id: 00000000-0000-0000-0000-000000000000
     template-file: ./main.bicep
-    parameters: ./main.bicepparam
+    parameters-file: ./main.bicepparam
 ```
 
 Deployment Stack
@@ -50,9 +50,12 @@ Deployment Stack
     subscription-id: 00000000-0000-0000-0000-000000000000
     template-file: ./main.bicep
     parameters-file: ./main.bicepparam
-    action-on-unmanage: deleteAll
+    action-on-unmanage-resources: delete
+    action-on-unmanage-resourcegroups: delete
     deny-settings-mode: denyWriteAndDelete
 ```
+
+For end-to-end workflow examples, please see [Deployment](./examples/DEPLOYMENT.md) & [Deployment Stacks](./examples/STACKS.md).
 
 ## Dependencies
 
