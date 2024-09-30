@@ -46,6 +46,10 @@ inputs:
   parameters-file:
     description: "Specifies the path to the parameters file."
     required: false
+  parameters:
+    description: "Specifies the parameters to use."
+    required: false
+
 
   what-if-exclude-change-types:
     description: "Specifies the change types to exclude from the 'What If' operation."

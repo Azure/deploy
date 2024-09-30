@@ -1,44 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import {
-  CompileParamsRequest,
-  CompileParamsResponse,
-  CompileRequest,
-  CompileResponse,
-} from "bicep-node";
+import { configureCompileMock, configureCompileParamsMock } from './mocks/bicepNodeMocks';
+import { configureReadFile } from './mocks/fsMocks';
 import { FileConfig } from "../src/config";
-import { getTemplateAndParameters } from "../src/helpers/file";
+import { getJsonParameters, getTemplateAndParameters } from "../src/helpers/file";
 import { readTestFile } from "./utils";
-
-let readFileMock = (filePath: string): string => {
-  throw "Not implemented";
-};
-let compileBicepMock = (request: CompileRequest): CompileResponse => {
-  throw "Not implemented";
-};
-let compileBicepParamsMock = (
-  request: CompileParamsRequest
-): CompileParamsResponse => {
-  throw "Not implemented";
-};
-
-jest.mock("bicep-node", () => ({
-  Bicep: {
-    install: jest.fn().mockResolvedValue(Promise.resolve("/path/to/bicep")),
-    initialize: jest.fn().mockResolvedValue({
-      compile: jest.fn().mockImplementation((p) => compileBicepMock(p)),
-      compileParams: jest
-        .fn()
-        .mockImplementation((p) => compileBicepParamsMock(p)),
-      version: jest.fn().mockReturnValue("1.2.3"),
-      dispose: jest.fn(),
-    }),
-  },
-}));
-
-jest.mock("fs/promises", () => ({
-  readFile: jest.fn().mockImplementation((path) => readFileMock(path)),
-}));
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -51,13 +17,13 @@ describe("file parsing", () => {
       parametersFile: "/path/to/parameters.json",
     };
 
-    readFileMock = (filePath) => {
+    configureReadFile(filePath => {
       if (filePath === "/path/to/template.json")
         return readTestFile("files/basic/main.json");
       if (filePath === "/path/to/parameters.json")
         return readTestFile("files/basic/main.parameters.json");
       throw `Unexpected file path: ${filePath}`;
-    };
+    });
 
     const { templateContents, parametersContents } =
       await getTemplateAndParameters(config);
@@ -76,12 +42,15 @@ describe("file parsing", () => {
   it("compiles Bicepparam files", async () => {
     const config: FileConfig = {
       parametersFile: "/path/to/main.bicepparam",
+      parameters: {
+        overrideMe: 'foo',
+      }
     };
 
-    compileBicepParamsMock = (req) => {
+    configureCompileParamsMock(req => {
       expect(req).toEqual({
         path: "/path/to/main.bicepparam",
-        parameterOverrides: {},
+        parameterOverrides: {overrideMe: 'foo'},
       });
 
       return {
@@ -90,7 +59,7 @@ describe("file parsing", () => {
         template: readTestFile("files/basic/main.json"),
         parameters: readTestFile("files/basic/main.parameters.json"),
       };
-    };
+    });
 
     const { templateContents, parametersContents } =
       await getTemplateAndParameters(config);
@@ -112,13 +81,13 @@ describe("file parsing", () => {
       templateFile: "/path/to/main.bicep",
     };
 
-    readFileMock = (filePath) => {
+    configureReadFile(filePath => {
       if (filePath === "/path/to/parameters.json")
         return readTestFile("files/basic/main.parameters.json");
       throw `Unexpected file path: ${filePath}`;
-    };
+    });
 
-    compileBicepMock = (req) => {
+    configureCompileMock(req => {
       expect(req).toEqual({
         path: "/path/to/main.bicep",
       });
@@ -128,7 +97,7 @@ describe("file parsing", () => {
         diagnostics: [],
         contents: readTestFile("files/basic/main.json"),
       };
-    };
+    });
 
     const { templateContents, parametersContents } =
       await getTemplateAndParameters(config);
@@ -164,5 +133,69 @@ describe("file parsing", () => {
     expect(async () => await getTemplateAndParameters(config)).rejects.toThrow(
       "Unsupported template file type: /path/to/main.what"
     );
+  });
+});
+
+describe("file parsing with parameters", () => {
+  it('accepts parameter overrides', async () => {
+    configureReadFile(filePath => {
+      if (filePath === "/parameters.json")
+        return readTestFile("files/basic/main.parameters.json");
+      throw `Unexpected file path: ${filePath}`;
+    });
+
+    const parameters = await getJsonParameters({
+      parametersFile: "/parameters.json",
+      parameters: {
+        objectParam: "this param has been overridden!",
+      }
+    });
+
+    expect(JSON.parse(parameters).parameters).toEqual({
+      intParam: {
+        value: 42
+      },
+      objectParam: {
+        value: "this param has been overridden!"
+      },
+      stringParam: {
+        value: "hello world"
+      },
+    });
+  });
+
+  it('can override missing parameters', async () => {
+    configureReadFile(filePath => {
+      if (filePath === "/parameters.json")
+        return JSON.stringify({parameters: {}});
+      throw `Unexpected file path: ${filePath}`;
+    });
+
+    const parameters = await getJsonParameters({
+      parametersFile: "/parameters.json",
+      parameters: {
+        objectParam: "this param has been overridden!",
+      }
+    });
+
+    expect(JSON.parse(parameters).parameters).toEqual({
+      objectParam: {
+        value: "this param has been overridden!"
+      },
+    });
+  });
+
+  it('works without a parameters file', async () => {
+    const parameters = await getJsonParameters({
+      parameters: {
+        objectParam: "this param has been overridden!",
+      }
+    });
+
+    expect(JSON.parse(parameters).parameters).toEqual({
+      objectParam: {
+        value: "this param has been overridden!"
+      },
+    });
   });
 });

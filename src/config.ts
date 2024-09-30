@@ -10,6 +10,7 @@ import {
   getOptionalStringArrayInput,
   getRequiredStringInput,
   getOptionalEnumArrayInput,
+  getOptionalDictionaryInput,
 } from "./helpers/input";
 
 type CommonScope = {
@@ -40,6 +41,7 @@ export type ResourceGroupScope = CommonScope & {
 export type FileConfig = {
   templateFile?: string;
   parametersFile?: string;
+  parameters?: Record<string, unknown>;
 };
 
 type CommonConfig = {
@@ -97,6 +99,7 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
   const location = getOptionalStringInput("location");
   const templateFile = getOptionalFilePath("template-file");
   const parametersFile = getOptionalFilePath("parameters-file");
+  const parameters = getOptionalDictionaryInput("parameters");
   const description = getOptionalStringInput("description");
   const tags = getOptionalStringDictionaryInput("tags");
 
@@ -108,6 +111,7 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
         location,
         templateFile,
         parametersFile,
+        parameters,
         tags,
         operation: getRequiredEnumInput("operation", [
           "create",
@@ -138,6 +142,7 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
         location,
         templateFile,
         parametersFile,
+        parameters,
         description,
         tags,
         operation: getRequiredEnumInput("operation", [
