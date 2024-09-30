@@ -1,49 +1,12 @@
-const mockDeploymentsOps: Partial<jest.MockedObjectDeep<Deployments>> = {
-  beginCreateOrUpdateAtSubscriptionScopeAndWait: jest.fn(),
-  beginValidateAtSubscriptionScopeAndWait: jest.fn(),
-  beginWhatIfAtSubscriptionScopeAndWait: jest.fn(),
-  beginCreateOrUpdateAndWait: jest.fn(),
-  beginValidateAndWait: jest.fn(),
-  beginWhatIfAndWait: jest.fn(),
-};
-
-const mockStacksOps: Partial<jest.MockedObjectDeep<DeploymentStacks>> = {
-  beginCreateOrUpdateAtSubscriptionAndWait: jest.fn(),
-  beginValidateStackAtSubscriptionAndWait: jest.fn(),
-  beginDeleteAtSubscriptionAndWait: jest.fn(),
-  beginCreateOrUpdateAtResourceGroupAndWait: jest.fn(),
-  beginValidateStackAtResourceGroupAndWait: jest.fn(),
-  beginDeleteAtResourceGroupAndWait: jest.fn(),
-};
-
-const azureMock = {
-  createDeploymentClient: jest.fn().mockReturnValue({
-    deployments: mockDeploymentsOps,
-  }),
-  createStacksClient: jest.fn().mockReturnValue({
-    deploymentStacks: mockStacksOps,
-  }),
-};
-
-jest.mock('../src/helpers/azure', () => azureMock);
-
-const mockActionsCore = {
-  info: jest.fn(),
-  warning: jest.fn(),
-  error: jest.fn(),
-  setOutput: jest.fn(),
-  setFailed: jest.fn(),
-}
-
-jest.mock('@actions/core', () => mockActionsCore);
-
+import { mockActionsCore } from './mocks/actionCoreMocks';
+import { mockDeploymentsOps, mockStacksOps, azureMock } from './mocks/azureMocks';
 import { RestError } from "@azure/core-rest-pipeline";
 import { DeploymentsConfig, DeploymentStackConfig, ResourceGroupScope, SubscriptionScope } from '../src/config'
 import { readTestFile } from './utils';
 import { execute } from '../src/handler';
 import { ParsedFiles } from '../src/helpers/file';
-import { Deployment, DeploymentExtended, DeploymentProperties, Deployments, ErrorResponse } from '@azure/arm-resources';
-import { DeploymentStack, DeploymentStackProperties, DeploymentStacks } from '@azure/arm-resourcesdeploymentstacks';
+import { Deployment, DeploymentExtended, DeploymentProperties, ErrorResponse } from '@azure/arm-resources';
+import { DeploymentStack, DeploymentStackProperties } from '@azure/arm-resourcesdeploymentstacks';
 import { Color, colorize } from "../src/helpers/logging";
 
 beforeEach(() => {

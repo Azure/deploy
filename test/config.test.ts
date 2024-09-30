@@ -1,18 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import * as core from "@actions/core";
-
+import { configureGetInputMock } from "./mocks/actionCoreMocks";
 import {
   DeploymentsConfig,
   DeploymentStackConfig,
   parseConfig,
 } from "../src/config";
-
-function configureGetInputMock(inputs: Record<string, string>) {
-  jest.spyOn(core, "getInput").mockImplementation((inputName) => {
-    return inputs[inputName];
-  });
-}
 
 describe("input validation", () => {
   it("requires type", async () => {
@@ -32,14 +25,14 @@ describe("input validation", () => {
   it("requires valid json for tags", async () => {
     configureGetInputMock({ type: "deployment", tags: "invalid" });
     expect(() => parseConfig()).toThrow(
-      "Action input 'tags' must be a dictionary of string values"
+      "Action input 'tags' must be a dictionary"
     );
   });
 
   it("requires valid json for tags", async () => {
     configureGetInputMock({ type: "deployment", tags: '{"foo": {}}' });
     expect(() => parseConfig()).toThrow(
-      "Action input 'tags' must be a dictionary of string values"
+      "Action input 'tags' must be a dictionary"
     );
   });
 
@@ -248,6 +241,7 @@ describe("input parsing", () => {
       location: "mockLocation",
       "template-file": "/path/to/mockTemplateFile",
       "parameters-file": "/path/to/mockParametersFile",
+      parameters: '{"foo": "bar2"}',
       description: "mockDescription",
       tags: '{"foo": "bar"}',
       "what-if-exclude-change-types": "[\"noChange\"]",
@@ -266,6 +260,9 @@ describe("input parsing", () => {
       location: "mockLocation",
       templateFile: "/path/to/mockTemplateFile",
       parametersFile: "/path/to/mockParametersFile",
+      parameters: {
+        foo: "bar2",
+      },
       tags: {
         foo: "bar",
       },
@@ -287,6 +284,7 @@ describe("input parsing", () => {
       location: "mockLocation",
       "template-file": "/path/to/mockTemplateFile",
       "parameters-file": "/path/to/mockParametersFile",
+      parameters: '{"foo": "bar2"}',
       description: "mockDescription",
       tags: '{"foo": "bar"}',
       "action-on-unmanage-resources": "delete",
@@ -310,6 +308,9 @@ describe("input parsing", () => {
       location: "mockLocation",
       templateFile: "/path/to/mockTemplateFile",
       parametersFile: "/path/to/mockParametersFile",
+      parameters: {
+        foo: "bar2",
+      },
       description: "mockDescription",
       tags: {
         foo: "bar",

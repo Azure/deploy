@@ -90,9 +90,9 @@ export function getOptionalEnumArrayInput<TEnum extends string>(
   return values as TEnum[];
 }
 
-export function getOptionalStringDictionaryInput(
+export function getOptionalDictionaryInput(
   inputName: string,
-): Record<string, string> {
+): Record<string, unknown> {
   const inputString = getOptionalStringInput(inputName);
   if (!inputString) {
     return {};
@@ -100,10 +100,16 @@ export function getOptionalStringDictionaryInput(
 
   const input = tryParseJson(inputString);
   if (typeof input !== "object") {
-    throw new Error(
-      `Action input '${inputName}' must be a dictionary of string values`,
-    );
+    throw new Error(`Action input '${inputName}' must be a dictionary`);
   }
+
+  return input;
+}
+
+export function getOptionalStringDictionaryInput(
+  inputName: string,
+): Record<string, string> {
+  const input = getOptionalDictionaryInput(inputName);
 
   Object.keys(input).forEach(key => {
     if (typeof input[key] !== "string") {
@@ -113,7 +119,7 @@ export function getOptionalStringDictionaryInput(
     }
   });
 
-  return input;
+  return input as Record<string, string>;
 }
 
 function getInput(

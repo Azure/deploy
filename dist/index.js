@@ -57976,6 +57976,7 @@ function parseConfig() {
     const location = (0, input_1.getOptionalStringInput)("location");
     const templateFile = (0, input_1.getOptionalFilePath)("template-file");
     const parametersFile = (0, input_1.getOptionalFilePath)("parameters-file");
+    const parameters = (0, input_1.getOptionalDictionaryInput)("parameters");
     const description = (0, input_1.getOptionalStringInput)("description");
     const tags = (0, input_1.getOptionalStringDictionaryInput)("tags");
     switch (type) {
@@ -57986,6 +57987,7 @@ function parseConfig() {
                 location,
                 templateFile,
                 parametersFile,
+                parameters,
                 tags,
                 operation: (0, input_1.getRequiredEnumInput)("operation", [
                     "create",
@@ -58013,6 +58015,7 @@ function parseConfig() {
                 location,
                 templateFile,
                 parametersFile,
+                parameters,
                 description,
                 tags,
                 operation: (0, input_1.getRequiredEnumInput)("operation", [
@@ -58492,6 +58495,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getJsonParameters = getJsonParameters;
 exports.getTemplateAndParameters = getTemplateAndParameters;
 exports.parse = parse;
 exports.resolvePath = resolvePath;
@@ -58502,11 +58506,11 @@ const path = __importStar(__nccwpck_require__(1017));
 const bicep_node_1 = __nccwpck_require__(837);
 const os_1 = __nccwpck_require__(2037);
 const logging_1 = __nccwpck_require__(6679);
-async function compileBicepParams(paramFilePath) {
+async function compileBicepParams(paramFilePath, parameters) {
     const bicepPath = await bicep_node_1.Bicep.install((0, os_1.tmpdir)());
     const result = await withBicep(bicepPath, bicep => bicep.compileParams({
         path: paramFilePath,
-        parameterOverrides: {},
+        parameterOverrides: parameters ?? {},
     }));
     logDiagnostics(result.diagnostics);
     if (!result.success) {
@@ -58529,19 +58533,27 @@ async function compileBicep(templateFilePath) {
     }
     return { template: result.contents };
 }
+async function getJsonParameters(config) {
+    const { parametersFile, parameters } = config;
+    const contents = parametersFile
+        ? JSON.parse(await fs.readFile(parametersFile, "utf8"))
+        : { parameters: {} };
+    for (const [key, value] of Object.entries(parameters ?? {})) {
+        contents["parameters"][key] = { value };
+    }
+    return JSON.stringify(contents);
+}
 async function getTemplateAndParameters(config) {
     const { parametersFile, templateFile } = config;
     if (parametersFile &&
         path.extname(parametersFile).toLowerCase() === ".bicepparam") {
-        return parse(await compileBicepParams(parametersFile));
+        return parse(await compileBicepParams(parametersFile, config.parameters));
     }
     if (parametersFile &&
         path.extname(parametersFile).toLowerCase() !== ".json") {
         throw new Error(`Unsupported parameters file type: ${parametersFile}`);
     }
-    const parameters = parametersFile
-        ? await fs.readFile(parametersFile, "utf8")
-        : undefined;
+    const parameters = await getJsonParameters(config);
     if (templateFile && path.extname(templateFile).toLowerCase() === ".bicep") {
         const { template } = await compileBicep(templateFile);
         return parse({ template, parameters });
@@ -58627,6 +58639,7 @@ exports.getOptionalFilePath = getOptionalFilePath;
 exports.getOptionalBooleanInput = getOptionalBooleanInput;
 exports.getOptionalStringArrayInput = getOptionalStringArrayInput;
 exports.getOptionalEnumArrayInput = getOptionalEnumArrayInput;
+exports.getOptionalDictionaryInput = getOptionalDictionaryInput;
 exports.getOptionalStringDictionaryInput = getOptionalStringDictionaryInput;
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -58692,15 +58705,19 @@ function getOptionalEnumArrayInput(inputName, allowedValues) {
     }
     return values;
 }
-function getOptionalStringDictionaryInput(inputName) {
+function getOptionalDictionaryInput(inputName) {
     const inputString = getOptionalStringInput(inputName);
     if (!inputString) {
         return {};
     }
     const input = tryParseJson(inputString);
     if (typeof input !== "object") {
-        throw new Error(`Action input '${inputName}' must be a dictionary of string values`);
+        throw new Error(`Action input '${inputName}' must be a dictionary`);
     }
+    return input;
+}
+function getOptionalStringDictionaryInput(inputName) {
+    const input = getOptionalDictionaryInput(inputName);
     Object.keys(input).forEach(key => {
         if (typeof input[key] !== "string") {
             throw new Error(`Action input '${inputName}' must be a dictionary of string values`);

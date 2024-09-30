@@ -16,13 +16,16 @@ export type ParsedFiles = {
   templateSpecId?: string;
 };
 
-async function compileBicepParams(paramFilePath: string) {
+async function compileBicepParams(
+  paramFilePath: string,
+  parameters?: Record<string, unknown>,
+) {
   const bicepPath = await Bicep.install(tmpdir());
 
   const result = await withBicep(bicepPath, bicep =>
     bicep.compileParams({
       path: paramFilePath,
-      parameterOverrides: {},
+      parameterOverrides: parameters ?? {},
     }),
   );
 
@@ -57,6 +60,20 @@ async function compileBicep(templateFilePath: string) {
   return { template: result.contents };
 }
 
+export async function getJsonParameters(config: FileConfig) {
+  const { parametersFile, parameters } = config;
+
+  const contents = parametersFile
+    ? JSON.parse(await fs.readFile(parametersFile, "utf8"))
+    : { parameters: {} };
+
+  for (const [key, value] of Object.entries(parameters ?? {})) {
+    contents["parameters"][key] = { value };
+  }
+
+  return JSON.stringify(contents);
+}
+
 export async function getTemplateAndParameters(config: FileConfig) {
   const { parametersFile, templateFile } = config;
 
@@ -64,7 +81,7 @@ export async function getTemplateAndParameters(config: FileConfig) {
     parametersFile &&
     path.extname(parametersFile).toLowerCase() === ".bicepparam"
   ) {
-    return parse(await compileBicepParams(parametersFile));
+    return parse(await compileBicepParams(parametersFile, config.parameters));
   }
 
   if (
@@ -74,9 +91,7 @@ export async function getTemplateAndParameters(config: FileConfig) {
     throw new Error(`Unsupported parameters file type: ${parametersFile}`);
   }
 
-  const parameters = parametersFile
-    ? await fs.readFile(parametersFile, "utf8")
-    : undefined;
+  const parameters = await getJsonParameters(config);
 
   if (templateFile && path.extname(templateFile).toLowerCase() === ".bicep") {
     const { template } = await compileBicep(templateFile);
