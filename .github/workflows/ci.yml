@@ -91,6 +91,10 @@ jobs:
           - ubuntu-latest
           - macos-latest
 
+    concurrency:
+      # Stacks are stateful - avoid modifying the same Stack concurrently
+      group: ${{ matrix.os }}
+
     steps:
       - name: Checkout
         id: checkout
