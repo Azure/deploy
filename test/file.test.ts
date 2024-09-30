@@ -6,10 +6,6 @@ import { FileConfig } from "../src/config";
 import { getJsonParameters, getTemplateAndParameters } from "../src/helpers/file";
 import { readTestFile } from "./utils";
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe("file parsing", () => {
   it("reads and parses template and parameters files", async () => {
     const config: FileConfig = {

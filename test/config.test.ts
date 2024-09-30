@@ -25,14 +25,14 @@ describe("input validation", () => {
   it("requires valid json for tags", async () => {
     configureGetInputMock({ type: "deployment", tags: "invalid" });
     expect(() => parseConfig()).toThrow(
-      "Action input 'tags' must be a dictionary"
+      "Action input 'tags' must be a valid JSON object"
     );
   });
 
   it("requires valid json for tags", async () => {
     configureGetInputMock({ type: "deployment", tags: '{"foo": {}}' });
     expect(() => parseConfig()).toThrow(
-      "Action input 'tags' must be a dictionary"
+      "Action input 'tags' must be a valid JSON object"
     );
   });
 
@@ -120,7 +120,7 @@ describe("input validation", () => {
       scope: "resourceGroup",
       "subscription-id": "foo",
       "resource-group-name": "mockRg",
-      "what-if-exclude-change-types": "[\"blah\"]",
+      "what-if-exclude-change-types": "blah",
     });
     expect(() => parseConfig()).toThrow(
       "Action input 'what-if-exclude-change-types' must be one of the following values: 'create', 'delete', 'modify', 'deploy', 'noChange', 'ignore', 'unsupported'"
@@ -244,7 +244,7 @@ describe("input parsing", () => {
       parameters: '{"foo": "bar2"}',
       description: "mockDescription",
       tags: '{"foo": "bar"}',
-      "what-if-exclude-change-types": "[\"noChange\"]",
+      "what-if-exclude-change-types": "noChange",
     });
 
     const config = parseConfig();
@@ -291,8 +291,8 @@ describe("input parsing", () => {
       "action-on-unmanage-resourcegroups": "delete",
       "action-on-unmanage-managementgroups": "delete",
       "deny-settings-mode": "none",
-      "deny-settings-excluded-actions": JSON.stringify(["abc", "def"]),
-      "deny-settings-excluded-principals": JSON.stringify(["ghi", "jkl"]),
+      "deny-settings-excluded-actions": "abc,def",
+      "deny-settings-excluded-principals": "ghi,jkl",
       "bypass-stack-out-of-sync-error": "true",
     });
 
