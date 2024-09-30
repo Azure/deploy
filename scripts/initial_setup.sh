@@ -47,6 +47,12 @@ if [[ -z $(az ad app federated-credential show --id $appId --federated-credentia
     --parameters '{"name":"'$credName'","issuer":"https://token.actions.githubusercontent.com","subject":"'$credSubject'","description":"GitHub OIDC Connection","audiences":["api://AzureADTokenExchange"]}' >/dev/null
 fi
 
-gh -R $repoOwner/$repoName secret set AZURE_CLIENT_ID --body $appId
-gh -R $repoOwner/$repoName secret set AZURE_SUBSCRIPTION_ID --body $subId
-gh -R $repoOwner/$repoName secret set AZURE_TENANT_ID --body $tenantId
+# Set secrets for GitHub Actions
+gh -R $repoOwner/$repoName secret set AZURE_CLIENT_ID --body $appId --app actions
+gh -R $repoOwner/$repoName secret set AZURE_SUBSCRIPTION_ID --body $subId --app actions
+gh -R $repoOwner/$repoName secret set AZURE_TENANT_ID --body $tenantId --app actions
+
+# Set secrets for GitHub Actions invoked by Dependabot
+gh -R $repoOwner/$repoName secret set AZURE_CLIENT_ID --body $appId --app dependabot
+gh -R $repoOwner/$repoName secret set AZURE_SUBSCRIPTION_ID --body $subId --app dependabot
+gh -R $repoOwner/$repoName secret set AZURE_TENANT_ID --body $tenantId --app dependabot
