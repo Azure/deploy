@@ -1,6 +1,7 @@
 # Azure Deployment Action
 
 > [!WARNING]
+>
 > ## ⚠️ This repository is currently under development, and not ready for usage ⚠️
 
 This repository offers a GitHub Action for automating the deployment and management of Azure resources using ARM Templates or Bicep files. It integrates smoothly into GitHub workflows, allowing developers to manage Azure infrastructure directly within their CI/CD pipelines.
@@ -29,9 +30,9 @@ Deployment
 - name: Deployment
   uses: azure/deploy@v1
   with:
-    operation: deployment
-    type: create
-    name: Microsoft.Deployment
+    type: deployment
+    operation: create
+    name: Development
     location: westus2
     scope: subscription
     subscription-id: 00000000-0000-0000-0000-000000000000
@@ -45,8 +46,8 @@ Deployment Stack
 - name: Deployment
   uses: azure/deploy@v1
   with:
-    operation: deploymentStack
-    type: create
+    type: deploymentStack
+    operation: create
     name: Development
     location: westus2
     scope: subscription
