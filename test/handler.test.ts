@@ -9,10 +9,6 @@ import { Deployment, DeploymentExtended, DeploymentProperties, ErrorResponse } f
 import { DeploymentStack, DeploymentStackProperties } from '@azure/arm-resourcesdeploymentstacks';
 import { Color, colorize } from "../src/helpers/logging";
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('deployment execution', () => {
   describe('subscription scope', () => {
     const scope: SubscriptionScope = {

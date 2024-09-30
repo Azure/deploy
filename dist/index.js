@@ -58631,10 +58631,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getRequiredEnumInput = getRequiredEnumInput;
-exports.getOptionalEnumInput = getOptionalEnumInput;
 exports.getRequiredStringInput = getRequiredStringInput;
 exports.getOptionalStringInput = getOptionalStringInput;
+exports.getRequiredEnumInput = getRequiredEnumInput;
+exports.getOptionalEnumInput = getOptionalEnumInput;
 exports.getOptionalFilePath = getOptionalFilePath;
 exports.getOptionalBooleanInput = getOptionalBooleanInput;
 exports.getOptionalStringArrayInput = getOptionalStringArrayInput;
@@ -58645,17 +58645,17 @@ exports.getOptionalStringDictionaryInput = getOptionalStringDictionaryInput;
 // Licensed under the MIT License.
 const core = __importStar(__nccwpck_require__(2186));
 const file_1 = __nccwpck_require__(8922);
-function getRequiredEnumInput(inputName, allowedValues) {
-    return getInput(inputName, allowedValues, true);
-}
-function getOptionalEnumInput(inputName, allowedValues) {
-    return getInput(inputName, allowedValues, false);
-}
 function getRequiredStringInput(inputName) {
     return getInput(inputName, undefined, true);
 }
 function getOptionalStringInput(inputName) {
     return getInput(inputName, undefined, false);
+}
+function getRequiredEnumInput(inputName, allowedValues) {
+    return getInput(inputName, allowedValues, true);
+}
+function getOptionalEnumInput(inputName, allowedValues) {
+    return getInput(inputName, allowedValues, false);
 }
 function getOptionalFilePath(inputName) {
     const input = getOptionalStringInput(inputName);
@@ -58681,19 +58681,7 @@ function getOptionalBooleanInput(inputName) {
 }
 function getOptionalStringArrayInput(inputName) {
     const inputString = getOptionalStringInput(inputName);
-    if (!inputString) {
-        return [];
-    }
-    const input = tryParseJson(inputString);
-    if (!Array.isArray(input)) {
-        throw new Error(`Action input '${inputName}' must be a JSON string array`);
-    }
-    input.forEach(val => {
-        if (typeof val !== "string") {
-            throw new Error(`Action input '${inputName}' must be a JSON string array`);
-        }
-    });
-    return input;
+    return inputString ? parseCommaSeparated(inputString) : [];
 }
 function getOptionalEnumArrayInput(inputName, allowedValues) {
     const values = getOptionalStringArrayInput(inputName);
@@ -58712,7 +58700,7 @@ function getOptionalDictionaryInput(inputName) {
     }
     const input = tryParseJson(inputString);
     if (typeof input !== "object") {
-        throw new Error(`Action input '${inputName}' must be a dictionary`);
+        throw new Error(`Action input '${inputName}' must be a valid JSON object`);
     }
     return input;
 }
@@ -58720,13 +58708,13 @@ function getOptionalStringDictionaryInput(inputName) {
     const input = getOptionalDictionaryInput(inputName);
     Object.keys(input).forEach(key => {
         if (typeof input[key] !== "string") {
-            throw new Error(`Action input '${inputName}' must be a dictionary of string values`);
+            throw new Error(`Action input '${inputName}' must be a valid JSON object containing only string values`);
         }
     });
     return input;
 }
 function getInput(inputName, allowedValues, throwOnMissing = true) {
-    const inputValue = core.getInput(inputName);
+    const inputValue = core.getInput(inputName)?.trim();
     if (!inputValue) {
         if (throwOnMissing) {
             throw new Error(`Action input '${inputName}' is required but not provided`);
@@ -58747,6 +58735,12 @@ function tryParseJson(value) {
     catch {
         return undefined;
     }
+}
+function parseCommaSeparated(value) {
+    return value
+        .split(",")
+        .map(val => val.trim())
+        .filter(val => val.length > 0);
 }
 
 

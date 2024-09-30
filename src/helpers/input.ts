@@ -4,6 +4,14 @@ import * as core from "@actions/core";
 
 import { resolvePath } from "./file";
 
+export function getRequiredStringInput(inputName: string): string {
+  return getInput(inputName, undefined, true) as string;
+}
+
+export function getOptionalStringInput(inputName: string): string | undefined {
+  return getInput(inputName, undefined, false);
+}
+
 export function getRequiredEnumInput<TEnum extends string>(
   inputName: string,
   allowedValues: TEnum[],
@@ -16,14 +24,6 @@ export function getOptionalEnumInput<TEnum extends string>(
   allowedValues: TEnum[],
 ): TEnum | undefined {
   return getInput(inputName, allowedValues, false) as TEnum | undefined;
-}
-
-export function getRequiredStringInput(inputName: string): string {
-  return getInput(inputName, undefined, true) as string;
-}
-
-export function getOptionalStringInput(inputName: string): string | undefined {
-  return getInput(inputName, undefined, false);
 }
 
 export function getOptionalFilePath(inputName: string): string | undefined {
@@ -52,24 +52,8 @@ export function getOptionalBooleanInput(inputName: string): boolean {
 
 export function getOptionalStringArrayInput(inputName: string): string[] {
   const inputString = getOptionalStringInput(inputName);
-  if (!inputString) {
-    return [];
-  }
 
-  const input = tryParseJson(inputString);
-  if (!Array.isArray(input)) {
-    throw new Error(`Action input '${inputName}' must be a JSON string array`);
-  }
-
-  input.forEach(val => {
-    if (typeof val !== "string") {
-      throw new Error(
-        `Action input '${inputName}' must be a JSON string array`,
-      );
-    }
-  });
-
-  return input;
+  return inputString ? parseCommaSeparated(inputString) : [];
 }
 
 export function getOptionalEnumArrayInput<TEnum extends string>(
@@ -100,7 +84,7 @@ export function getOptionalDictionaryInput(
 
   const input = tryParseJson(inputString);
   if (typeof input !== "object") {
-    throw new Error(`Action input '${inputName}' must be a dictionary`);
+    throw new Error(`Action input '${inputName}' must be a valid JSON object`);
   }
 
   return input;
@@ -114,7 +98,7 @@ export function getOptionalStringDictionaryInput(
   Object.keys(input).forEach(key => {
     if (typeof input[key] !== "string") {
       throw new Error(
-        `Action input '${inputName}' must be a dictionary of string values`,
+        `Action input '${inputName}' must be a valid JSON object containing only string values`,
       );
     }
   });
@@ -127,7 +111,7 @@ function getInput(
   allowedValues?: string[],
   throwOnMissing = true,
 ): string | undefined {
-  const inputValue = core.getInput(inputName);
+  const inputValue = core.getInput(inputName)?.trim();
   if (!inputValue) {
     if (throwOnMissing) {
       throw new Error(
@@ -153,4 +137,11 @@ function tryParseJson(value: string) {
   } catch {
     return undefined;
   }
+}
+
+function parseCommaSeparated(value: string) {
+  return value
+    .split(",")
+    .map(val => val.trim())
+    .filter(val => val.length > 0);
 }
