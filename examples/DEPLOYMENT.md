@@ -1,6 +1,6 @@
 # Deployment
 
-This snippet showcases the default usage of the `azure/deploy@v1` action for creating an Azure deployment. It initiates a deployment named "Development" in the `westus2` region at the resource group scope. The deployment uses `main.bicep` as the template file and `main.bicepparam` for parameters, targeting a specific Azure subscription with the provided subscription ID.
+This snippet showcases the default usage of the `azure/deploy@v1` action for creating an Azure deployment. It initiates a deployment named "Development" in the `westus2` region at the resource group scope. The deployment uses `main.bicep` as the template file and `main.bicepparam` for parameters, targeting a specific Azure resource group.
 
 ```yaml
 - name: Sample
@@ -17,7 +17,7 @@ This snippet showcases the default usage of the `azure/deploy@v1` action for cre
     parameters-file: ./main.bicepparam
 ```
 
-This snippet demonstrates the default usage of the `azure/deploy@v1` action for creating an Azure deployment at the resource group level. It initiates a deployment named "Development" in the `westus2` region, targeting a specific resource group called "example." The deployment uses `main.bicep` as the template file, and the parameters are provided as a JSON object, specifying the resource name as "Development" and tagging it with the environment label "development." The configuration also targets a specific Azure subscription with the provided subscription ID.
+This snippet demonstrates the default usage of the `azure/deploy@v1` action for creating an Azure deployment at the resource group level. It initiates a deployment named "Development" in the `westus2` region, targeting a specific resource group called "example." The deployment uses `main.bicep` as the template file, and the parameters are provided as a JSON object, specifying the resource name as "Development" and tagging it with the environment label "development." The configuration also targets a specific Azure resource group.
 
 ```yaml
 - name: Deployment
