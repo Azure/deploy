@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.s
 import { Bicep, CompileParamsRequest, CompileParamsResponse, CompileRequest, CompileResponse } from "bicep-node";
 
 const mockBicep: Partial<jest.MockedObjectDeep<Bicep>> = {
