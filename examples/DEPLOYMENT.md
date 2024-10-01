@@ -1,6 +1,42 @@
 # Deployment
 
-**Create & Update**
+This snippet showcases the default usage of the `azure/deploy@v1` action for creating an Azure deployment. It initiates a deployment named "Development" in the `westus2` region at the resource group scope. The deployment uses `main.bicep` as the template file and `main.bicepparam` for parameters, targeting a specific Azure subscription with the provided subscription ID.
+
+```yaml
+- name: Sample
+  uses: azure/deploy@v1
+  with:
+    type: deployment
+    operation: create
+    name: Development
+    location: westus2
+    scope: resourceGroup
+    subscription-id: 00000000-0000-0000-0000-000000000000
+    resource-group-name: example
+    template-file: ./main.bicep
+    parameters-file: ./main.bicepparam
+```
+
+This snippet demonstrates the default usage of the `azure/deploy@v1` action for creating an Azure deployment at the resource group level. It initiates a deployment named "Development" in the `westus2` region, targeting a specific resource group called "example." The deployment uses `main.bicep` as the template file, and the parameters are provided as a JSON object, specifying the resource name as "Development" and tagging it with the environment label "development." The configuration also targets a specific Azure subscription with the provided subscription ID.
+
+```yaml
+- name: Deployment
+  uses: azure/deploy@v1
+  with:
+    type: deployment
+    operation: create
+    name: Development
+    location: westus2
+    scope: resourceGroup
+    subscription-id: 00000000-0000-0000-0000-000000000000
+    resource-group-name: example
+    template-file: ./src/main.bicep
+    parameters: '{"name": "Development", "tags": { "environment": "development" }}'
+```
+
+**Create**
+
+This workflow automates the deployment process by triggering on pushes to the main branch. It runs on an Ubuntu runner, checks out the repository, logs into Azure with federated credentials, and deploys using the specified ARM or Bicep templates and parameters, targeting a specific Azure resource group and location.
 
 ```yaml
 name: Deployment (Create)
@@ -16,7 +52,7 @@ permissions:
 
 jobs:
   deployment:
-    name: "Deployment"
+    name: Deployment
     runs-on: ubuntu-latest
 
     steps:
@@ -33,17 +69,20 @@ jobs:
       - name: Create
         uses: azure/deploy@v1
         with:
-          operation: deployment
-          type: create
+          type: deployment
+          operation: create
           name: Development
           location: westus2
-          scope: subscription
-          subscription-id: 00000000-0000-0000-0000-000000000000
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: example
           template-file: ./main.bicep
-          parameters-file: ./main.bicepparameters.json
+          parameters-file: ./main.bicepparam
 ```
 
 **Validate & What-If**
+
+This workflow triggers on pull requests to the main branch. It runs on an Ubuntu runner, checks out the repository, logs into Azure with federated credentials, and performs both a "Validate" and a "What-If" operation using the specified ARM or Bicep templates and parameters, targeting a specific Azure resource group and location.
 
 ```yaml
 name: Deployment (Validate)
@@ -59,7 +98,7 @@ permissions:
 
 jobs:
   deployment:
-    name: "Validate"
+    name: Validate
     runs-on: ubuntu-latest
 
     steps:
@@ -80,8 +119,9 @@ jobs:
           type: validate
           name: Development
           location: westus2
-          scope: subscription
-          subscription-id: 00000000-0000-0000-0000-000000000000
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: example
           template-file: ./main.bicep
           parameters-file: ./main.bicepparam
 
@@ -92,8 +132,9 @@ jobs:
           type: whatIf
           name: Development
           location: westus2
-          scope: subscription
-          subscription-id: 00000000-0000-0000-0000-000000000000
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: example
           template-file: ./main.bicep
           parameters-file: ./main.bicepparam
 ```
