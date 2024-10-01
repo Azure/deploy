@@ -68,7 +68,7 @@ inputs:
     description: "Specifies the mode of the deny settings. Choose from 'denyDelete', 'denyWriteAndDelete', 'none'."
     required: false
   deny-settings-excluded-actions:
-    description: "Specifies the excluded action for the deny settings."
+    description: "Specifies the excluded actions for the deny settings."
     required: false
   deny-settings-excluded-principals:
     description: "Specifies the excluded principals for the deny settings."
