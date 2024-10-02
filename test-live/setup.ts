@@ -12,6 +12,7 @@ const mockCore = {
   setOutput: jest.fn(),
 };
 
+// eslint-disable-next-line jest/no-untyped-mock-factory
 jest.mock("@actions/core", () => mockCore);
 
 type ActionResult = {

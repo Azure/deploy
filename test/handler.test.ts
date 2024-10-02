@@ -78,8 +78,8 @@ describe("deployment execution", () => {
     };
 
     it("deploys", async () => {
-      mockDeploymentsOps.beginCreateOrUpdateAtSubscriptionScopeAndWait!.mockReturnValue(
-        Promise.resolve(mockReturnPayload),
+      mockDeploymentsOps.beginCreateOrUpdateAtSubscriptionScopeAndWait!.mockResolvedValue(
+        mockReturnPayload,
       );
 
       await execute(config, files);
@@ -110,8 +110,8 @@ describe("deployment execution", () => {
     });
 
     it("what-ifs", async () => {
-      mockDeploymentsOps.beginWhatIfAtSubscriptionScopeAndWait!.mockReturnValue(
-        Promise.resolve({}),
+      mockDeploymentsOps.beginWhatIfAtSubscriptionScopeAndWait!.mockResolvedValue(
+        {},
       );
 
       await execute({ ...config, operation: "whatIf" }, files);
@@ -193,8 +193,8 @@ describe("deployment execution", () => {
     };
 
     it("deploys", async () => {
-      mockDeploymentsOps.beginCreateOrUpdateAndWait!.mockReturnValue(
-        Promise.resolve(mockReturnPayload),
+      mockDeploymentsOps.beginCreateOrUpdateAndWait!.mockResolvedValue(
+        mockReturnPayload,
       );
 
       await execute(config, files);
@@ -269,9 +269,7 @@ describe("deployment execution", () => {
     });
 
     it("what-ifs", async () => {
-      mockDeploymentsOps.beginWhatIfAndWait!.mockReturnValue(
-        Promise.resolve({}),
-      );
+      mockDeploymentsOps.beginWhatIfAndWait!.mockResolvedValue({});
 
       await execute({ ...config, operation: "whatIf" }, files);
 
@@ -345,8 +343,8 @@ describe("stack execution", () => {
     };
 
     it("deploys", async () => {
-      mockStacksOps.beginCreateOrUpdateAtSubscriptionAndWait!.mockReturnValue(
-        Promise.resolve(mockReturnPayload),
+      mockStacksOps.beginCreateOrUpdateAtSubscriptionAndWait!.mockResolvedValue(
+        mockReturnPayload,
       );
 
       await execute(config, files);
@@ -444,8 +442,8 @@ describe("stack execution", () => {
     };
 
     it("deploys", async () => {
-      mockStacksOps.beginCreateOrUpdateAtResourceGroupAndWait!.mockReturnValue(
-        Promise.resolve(mockReturnPayload),
+      mockStacksOps.beginCreateOrUpdateAtResourceGroupAndWait!.mockResolvedValue(
+        mockReturnPayload,
       );
 
       await execute(config, files);

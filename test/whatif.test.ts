@@ -17,7 +17,7 @@ describe("formatJson tests", () => {
     ];
 
     testData.forEach(([expected, value]) => {
-      expect(formatJson(value, "debug")).toEqual(expected);
+      expect(formatJson(value, "debug")).toStrictEqual(expected);
     });
   });
 
@@ -37,7 +37,7 @@ describe("formatJson tests", () => {
   10<RESET>:<RESET> 10
 <RESET>]<RESET>`;
 
-    expect(formatJson(value, "debug")).toEqual(expected);
+    expect(formatJson(value, "debug")).toStrictEqual(expected);
   });
 
   it("test_non_empty_object", () => {
@@ -51,7 +51,7 @@ describe("formatJson tests", () => {
   longPath.to.bar<RESET>:<RESET> "bar"
 `;
 
-    expect(formatJson(value, "debug")).toEqual(expected);
+    expect(formatJson(value, "debug")).toStrictEqual(expected);
   });
 
   it("test_complex_value", () => {
@@ -88,7 +88,7 @@ describe("formatJson tests", () => {
   <RESET>]<RESET>  root.foobar<RESET>:<RESET> "foobar"
 `;
 
-    expect(formatJson(value, "debug")).toEqual(expected);
+    expect(formatJson(value, "debug")).toStrictEqual(expected);
   });
 });
 
@@ -257,6 +257,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2
 `;
 
     const result = formatWhatIfOperationResult({ changes }, "debug");
+
     expect(result).toContain(expected);
   });
 
@@ -395,7 +396,9 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
           {
             path: "path.a.to.change",
             propertyChangeType: "Modify",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             before: "foo" as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             after: "bar" as any,
           },
           {
@@ -407,6 +410,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
           {
             path: "path.a.to.change3",
             propertyChangeType: "NoEffect",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             after: 12345 as any,
           },
           {
@@ -420,16 +424,20 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                   {
                     path: "foo.bar",
                     propertyChangeType: "Modify",
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     before: true as any,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     after: false as any,
                   },
                   {
                     path: "baz",
                     propertyChangeType: "Create",
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     after: ["element1", "element2"] as any,
                   },
                 ],
               },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               { path: "5", propertyChangeType: "Delete", before: 12345 as any },
             ],
           },
@@ -470,7 +478,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
     expect(result).toContain(expected);
   });
 
-  test("test_json_alignment", () => {
+  it("test_json_alignment", () => {
     const changes: WhatIfChange[] = [
       {
         resourceId:
@@ -510,7 +518,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
     expect(result).toContain(expected);
   });
 
-  test("test_property_changes_alignment", () => {
+  it("test_property_changes_alignment", () => {
     const changes: WhatIfChange[] = [
       {
         resourceId:
@@ -525,6 +533,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
           {
             path: "long.path",
             propertyChangeType: "Create",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             after: [] as any,
           },
           {
@@ -534,6 +543,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
               {
                 path: "5",
                 propertyChangeType: "Delete",
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 before: 12345 as any,
               },
             ],
@@ -559,7 +569,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
     expect(result).toContain(expected);
   });
 
-  test("test_nested_array_changes", () => {
+  it("test_nested_array_changes", () => {
     const changes: WhatIfChange[] = [
       {
         resourceId:
@@ -575,6 +585,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                 propertyChangeType: "Modify",
                 children: [
                   {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     path: null as any,
                     propertyChangeType: "Array",
                     children: [
@@ -585,6 +596,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                           {
                             path: "order",
                             propertyChangeType: "Delete",
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             before: "ascending" as any,
                           },
                         ],

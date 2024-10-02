@@ -20,8 +20,10 @@ describe("file parsing", () => {
     };
 
     configureReadFile(filePath => {
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (filePath === "/path/to/template.json")
         return readTestFile("files/basic/main.json");
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (filePath === "/path/to/parameters.json")
         return readTestFile("files/basic/main.parameters.json");
       throw `Unexpected file path: ${filePath}`;
@@ -30,12 +32,12 @@ describe("file parsing", () => {
     const { templateContents, parametersContents } =
       await getTemplateAndParameters(config);
 
-    expect(templateContents["$schema"]).toEqual(
+    expect(templateContents["$schema"]).toBe(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     );
     expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
-    expect(parametersContents["$schema"]).toEqual(
+    expect(parametersContents["$schema"]).toBe(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     );
     expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
@@ -50,7 +52,7 @@ describe("file parsing", () => {
     };
 
     configureCompileParamsMock(req => {
-      expect(req).toEqual({
+      expect(req).toStrictEqual({
         path: "/path/to/main.bicepparam",
         parameterOverrides: { overrideMe: "foo" },
       });
@@ -66,12 +68,12 @@ describe("file parsing", () => {
     const { templateContents, parametersContents } =
       await getTemplateAndParameters(config);
 
-    expect(templateContents["$schema"]).toEqual(
+    expect(templateContents["$schema"]).toBe(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     );
     expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
-    expect(parametersContents["$schema"]).toEqual(
+    expect(parametersContents["$schema"]).toBe(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     );
     expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
@@ -84,13 +86,14 @@ describe("file parsing", () => {
     };
 
     configureReadFile(filePath => {
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (filePath === "/path/to/parameters.json")
         return readTestFile("files/basic/main.parameters.json");
       throw `Unexpected file path: ${filePath}`;
     });
 
     configureCompileMock(req => {
-      expect(req).toEqual({
+      expect(req).toStrictEqual({
         path: "/path/to/main.bicep",
       });
 
@@ -104,12 +107,12 @@ describe("file parsing", () => {
     const { templateContents, parametersContents } =
       await getTemplateAndParameters(config);
 
-    expect(templateContents["$schema"]).toEqual(
+    expect(templateContents["$schema"]).toBe(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     );
     expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
-    expect(parametersContents["$schema"]).toEqual(
+    expect(parametersContents["$schema"]).toBe(
       "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     );
     expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
@@ -121,6 +124,7 @@ describe("file parsing", () => {
       templateFile: "/path/to/main.json",
     };
 
+    // eslint-disable-next-line jest/valid-expect
     expect(async () => await getTemplateAndParameters(config)).rejects.toThrow(
       "Unsupported parameters file type: /path/to/parameters.what",
     );
@@ -132,6 +136,7 @@ describe("file parsing", () => {
       templateFile: "/path/to/main.what",
     };
 
+    // eslint-disable-next-line jest/valid-expect
     expect(async () => await getTemplateAndParameters(config)).rejects.toThrow(
       "Unsupported template file type: /path/to/main.what",
     );
@@ -141,6 +146,7 @@ describe("file parsing", () => {
 describe("file parsing with parameters", () => {
   it("accepts parameter overrides", async () => {
     configureReadFile(filePath => {
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (filePath === "/parameters.json")
         return readTestFile("files/basic/main.parameters.json");
       throw `Unexpected file path: ${filePath}`;
@@ -153,7 +159,7 @@ describe("file parsing with parameters", () => {
       },
     });
 
-    expect(JSON.parse(parameters).parameters).toEqual({
+    expect(JSON.parse(parameters).parameters).toStrictEqual({
       intParam: {
         value: 42,
       },
@@ -168,6 +174,7 @@ describe("file parsing with parameters", () => {
 
   it("can override missing parameters", async () => {
     configureReadFile(filePath => {
+      // eslint-disable-next-line jest/no-conditional-in-test
       if (filePath === "/parameters.json")
         return JSON.stringify({ parameters: {} });
       throw `Unexpected file path: ${filePath}`;
@@ -180,7 +187,7 @@ describe("file parsing with parameters", () => {
       },
     });
 
-    expect(JSON.parse(parameters).parameters).toEqual({
+    expect(JSON.parse(parameters).parameters).toStrictEqual({
       objectParam: {
         value: "this param has been overridden!",
       },
@@ -194,7 +201,7 @@ describe("file parsing with parameters", () => {
       },
     });
 
-    expect(JSON.parse(parameters).parameters).toEqual({
+    expect(JSON.parse(parameters).parameters).toStrictEqual({
       objectParam: {
         value: "this param has been overridden!",
       },

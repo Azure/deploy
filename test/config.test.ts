@@ -24,7 +24,7 @@ describe("input validation", () => {
     );
   });
 
-  it("requires valid json for tags", async () => {
+  it("requires valid json for tags string", async () => {
     configureGetInputMock({ type: "deployment", tags: "invalid" });
 
     expect(() => parseConfig()).toThrow(
@@ -32,7 +32,7 @@ describe("input validation", () => {
     );
   });
 
-  it("requires valid json for tags", async () => {
+  it("requires valid json for tags object", async () => {
     configureGetInputMock({ type: "deployment", tags: '{"foo": {}}' });
 
     expect(() => parseConfig()).toThrow(
@@ -269,6 +269,7 @@ describe("input parsing", () => {
 
     const config = parseConfig();
 
+    // eslint-disable-next-line jest/prefer-strict-equal
     expect(config).toEqual<DeploymentsConfig>({
       type: "deployment",
       name: "mockName",
@@ -317,6 +318,7 @@ describe("input parsing", () => {
 
     const config = parseConfig();
 
+    // eslint-disable-next-line jest/prefer-strict-equal
     expect(config).toEqual<DeploymentStackConfig>({
       type: "deploymentStack",
       name: "mockName",
