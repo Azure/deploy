@@ -1,6 +1,12 @@
 // Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.s
-import { Bicep, CompileParamsRequest, CompileParamsResponse, CompileRequest, CompileResponse } from "bicep-node";
+// Licensed under the MIT License.
+import {
+  Bicep,
+  CompileParamsRequest,
+  CompileParamsResponse,
+  CompileRequest,
+  CompileResponse,
+} from "bicep-node";
 
 const mockBicep: Partial<jest.MockedObjectDeep<Bicep>> = {
   compile: jest.fn(),
@@ -9,12 +15,18 @@ const mockBicep: Partial<jest.MockedObjectDeep<Bicep>> = {
   dispose: jest.fn(),
 };
 
-export function configureCompileMock(mock: (request: CompileRequest) => CompileResponse) {
+export function configureCompileMock(
+  mock: (request: CompileRequest) => CompileResponse,
+) {
   mockBicep.compile!.mockImplementation(req => Promise.resolve(mock(req)));
 }
 
-export function configureCompileParamsMock(mock: (request: CompileParamsRequest) => CompileParamsResponse) {
-  mockBicep.compileParams!.mockImplementation(req => Promise.resolve(mock(req)));
+export function configureCompileParamsMock(
+  mock: (request: CompileParamsRequest) => CompileParamsResponse,
+) {
+  mockBicep.compileParams!.mockImplementation(req =>
+    Promise.resolve(mock(req)),
+  );
 }
 
 const mockBicepNode = {
@@ -24,4 +36,5 @@ const mockBicepNode = {
   },
 };
 
-jest.mock('bicep-node', () => mockBicepNode);
+// eslint-disable-next-line jest/no-untyped-mock-factory
+jest.mock("bicep-node", () => mockBicepNode);

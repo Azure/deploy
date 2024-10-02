@@ -30,4 +30,5 @@ export const azureMock = {
   }),
 };
 
-jest.mock('../../src/helpers/azure', () => azureMock);
+// eslint-disable-next-line jest/no-untyped-mock-factory
+jest.mock("../../src/helpers/azure", () => azureMock);

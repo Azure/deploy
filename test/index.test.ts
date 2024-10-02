@@ -10,6 +10,7 @@ describe("index", () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("../src/index");
 
+    // eslint-disable-next-line jest/prefer-called-with
     expect(runMock).toHaveBeenCalled();
   });
 });

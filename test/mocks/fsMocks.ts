@@ -5,7 +5,10 @@ const mockFsPromises = {
 };
 
 export function configureReadFile(mock: (filePath: string) => string) {
-  mockFsPromises.readFile.mockImplementation(filePath => Promise.resolve(mock(filePath)));
+  mockFsPromises.readFile.mockImplementation(filePath =>
+    Promise.resolve(mock(filePath)),
+  );
 }
 
-jest.mock('fs/promises', () => mockFsPromises);
+// eslint-disable-next-line jest/no-untyped-mock-factory
+jest.mock("fs/promises", () => mockFsPromises);
