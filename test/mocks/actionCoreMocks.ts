@@ -9,10 +9,10 @@ export const mockActionsCore = {
   setOutput: jest.fn(),
 };
 
-jest.mock('@actions/core', () => mockActionsCore);
+jest.mock("@actions/core", () => mockActionsCore);
 
 export function configureGetInputMock(inputs: Record<string, string>) {
-  mockActionsCore.getInput.mockImplementation((inputName) => {
+  mockActionsCore.getInput.mockImplementation(inputName => {
     return inputs[inputName];
   });
 }

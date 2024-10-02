@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { formatJson, formatWhatIfOperationResult } from '../src/helpers/whatif';
-import { WhatIfChange } from '@azure/arm-resources';
+import { formatJson, formatWhatIfOperationResult } from "../src/helpers/whatif";
+import { WhatIfChange } from "@azure/arm-resources";
 
-describe('formatJson tests', () => {
-  it('test_leaf', () => {
+describe("formatJson tests", () => {
+  it("test_leaf", () => {
     const testData = [
-      ['null', null],
-      ['true', true],
-      ['false', false],
-      ['42', 42],
-      ['42.12345', 42.12345],
-      ['"foo"', 'foo'],
-      ['{}', {}],
-      ['[]', []],
+      ["null", null],
+      ["true", true],
+      ["false", false],
+      ["42", 42],
+      ["42.12345", 42.12345],
+      ['"foo"', "foo"],
+      ["{}", {}],
+      ["[]", []],
     ];
 
     testData.forEach(([expected, value]) => {
-      expect(formatJson(value, 'debug')).toEqual(expected);
+      expect(formatJson(value, "debug")).toEqual(expected);
     });
   });
 
-  it('test_non_empty_array', () => {
+  it("test_non_empty_array", () => {
     const value = Array.from({ length: 11 }, (_, i) => i);
     let expected = `<RESET>[<RESET>
   0<RESET>:<RESET>  0
@@ -37,27 +37,35 @@ describe('formatJson tests', () => {
   10<RESET>:<RESET> 10
 <RESET>]<RESET>`;
 
-    expect(formatJson(value, 'debug')).toEqual(expected);
+    expect(formatJson(value, "debug")).toEqual(expected);
   });
 
-  it('test_non_empty_object', () => {
-    const value = { path: { to: { foo: 'foo' } }, longPath: { to: { bar: 'bar' } } };
+  it("test_non_empty_object", () => {
+    const value = {
+      path: { to: { foo: "foo" } },
+      longPath: { to: { bar: "bar" } },
+    };
     let expected = `
 
   path.to.foo<RESET>:<RESET>     "foo"
   longPath.to.bar<RESET>:<RESET> "bar"
 `;
 
-    expect(formatJson(value, 'debug')).toEqual(expected);
+    expect(formatJson(value, "debug")).toEqual(expected);
   });
 
-  it('test_complex_value', () => {
+  it("test_complex_value", () => {
     const value = {
       root: {
         foo: 1234,
-        bar: [true, null, { nestedString: 'value', nestedArray: [92747, 'test'] }, [false]],
-        foobar: 'foobar',
-      }
+        bar: [
+          true,
+          null,
+          { nestedString: "value", nestedArray: [92747, "test"] },
+          [false],
+        ],
+        foobar: "foobar",
+      },
     };
 
     let expected = `
@@ -80,45 +88,50 @@ describe('formatJson tests', () => {
   <RESET>]<RESET>  root.foobar<RESET>:<RESET> "foobar"
 `;
 
-    expect(formatJson(value, 'debug')).toEqual(expected);
+    expect(formatJson(value, "debug")).toEqual(expected);
   });
 });
 
-describe('TestFormatWhatIfOperationResult', () => {
-  it('test_change_type_legend', () => {
+describe("TestFormatWhatIfOperationResult", () => {
+  it("test_change_type_legend", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo1',
-        changeType: 'Modify'
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo1",
+        changeType: "Modify",
       },
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar',
-        changeType: 'Create'
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar",
+        changeType: "Create",
       },
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2',
-        changeType: 'Modify'
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2",
+        changeType: "Modify",
       },
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1',
-        changeType: 'Ignore'
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1",
+        changeType: "Ignore",
       },
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3',
-        changeType: 'Modify',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3",
+        changeType: "Modify",
         delta: [
           {
-            path: 'path.to.array.change',
-            propertyChangeType: 'Array',
+            path: "path.to.array.change",
+            propertyChangeType: "Array",
             children: [
               {
-                path: '1',
-                propertyChangeType: 'Delete',
-              }
-            ]
-          }
-        ]
-      }
+                path: "1",
+                propertyChangeType: "Delete",
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const expected = `Note: The result may contain false positive predictions (noise).
@@ -152,33 +165,77 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2
 <RESET>
 Resource changes: 1 to create, 3 to modify, 1 to ignore.`;
 
-    expect(formatWhatIfOperationResult({ changes }, 'debug')).toBe(expected);
+    expect(formatWhatIfOperationResult({ changes }, "debug")).toBe(expected);
   });
 
-
-  it('test_resource_changes_stats', () => {
+  it("test_resource_changes_stats", () => {
     const changes: WhatIfChange[] = [
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo1", changeType: 'Create' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar", changeType: 'Create' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2", changeType: 'Modify' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1", changeType: 'Ignore' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3", changeType: 'Delete' },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo1",
+        changeType: "Create",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar",
+        changeType: "Create",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2",
+        changeType: "Modify",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1",
+        changeType: "Ignore",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3",
+        changeType: "Delete",
+      },
     ];
 
-    const expected = "\nResource changes: 1 to delete, 2 to create, 1 to modify, 1 to ignore.";
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const expected =
+      "\nResource changes: 1 to delete, 2 to create, 1 to modify, 1 to ignore.";
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result.endsWith(expected)).toBeTruthy();
   });
 
-  it('test_group_resources_changes_by_sorted_scope', () => {
+  it("test_group_resources_changes_by_sorted_scope", () => {
     const changes: WhatIfChange[] = [
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/RG1/providers/p1/foo1", changeType: 'Create' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar", changeType: 'Create' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2", changeType: 'Modify' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1", changeType: 'Ignore' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar2", changeType: 'Delete' },
-      { resourceId: "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3", changeType: 'Delete' },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/RG1/providers/p1/foo1",
+        changeType: "Create",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar",
+        changeType: "Create",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2",
+        changeType: "Modify",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1",
+        changeType: "Ignore",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar2",
+        changeType: "Delete",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3",
+        changeType: "Delete",
+      },
     ];
 
     const expected = `
@@ -199,20 +256,52 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2
 <RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
     expect(result).toContain(expected);
   });
 
-  it('should sort resource IDs within a scope', () => {
+  it("should sort resource IDs within a scope", () => {
     const changes: WhatIfChange[] = [
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo', changeType: 'Ignore' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/foo', changeType: 'Create' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p3/foo', changeType: 'NoChange' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p4/foo', changeType: 'Deploy' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p5/foo', changeType: 'Delete' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p6/foo', changeType: 'Delete' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p7/foo', changeType: 'Delete' },
-      { resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p8/foo', changeType: 'Unsupported' }
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+        changeType: "Ignore",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/foo",
+        changeType: "Create",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p3/foo",
+        changeType: "NoChange",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p4/foo",
+        changeType: "Deploy",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p5/foo",
+        changeType: "Delete",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p6/foo",
+        changeType: "Delete",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p7/foo",
+        changeType: "Delete",
+      },
+      {
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p8/foo",
+        changeType: "Unsupported",
+      },
     ];
 
     const expected = `
@@ -229,22 +318,23 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result).toContain(expected);
   });
 
-  it('should handle property create changes', () => {
+  it("should handle property create changes", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo',
-        changeType: 'Create',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+        changeType: "Create",
         after: {
           numberValue: 1.2,
           booleanValue: true,
-          stringValue: 'The quick brown fox jumps over the lazy dog.'
-        }
-      }
+          stringValue: "The quick brown fox jumps over the lazy dog.",
+        },
+      },
     ];
 
     const expected = `
@@ -258,23 +348,24 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result).toContain(expected);
   });
 
-  it('should handle property delete changes', () => {
+  it("should handle property delete changes", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo',
-        changeType: 'Delete',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+        changeType: "Delete",
         before: {
-          apiVersion: '2020-04-01',
+          apiVersion: "2020-04-01",
           numberValue: 1.2,
           booleanValue: true,
-          stringValue: 'The quick brown fox jumps over the lazy dog.'
-        }
-      }
+          stringValue: "The quick brown fox jumps over the lazy dog.",
+        },
+      },
     ];
 
     const expected = `
@@ -289,33 +380,61 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result).toContain(expected);
   });
 
-  it('should handle property modify changes', () => {
+  it("should handle property modify changes", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo',
-        changeType: 'Modify',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+        changeType: "Modify",
         delta: [
-          { path: 'path.a.to.change', propertyChangeType: 'Modify', before: 'foo' as any, after: 'bar' as any },
-          { path: 'path.a.to.change2', propertyChangeType: 'Modify', before: { tag1: 'value' }, after: { tag2: 'value' } },
-          { path: 'path.a.to.change3', propertyChangeType: 'NoEffect', after: 12345 as any },
           {
-            path: 'path.b.to.nested.change', propertyChangeType: 'Array', children: [
+            path: "path.a.to.change",
+            propertyChangeType: "Modify",
+            before: "foo" as any,
+            after: "bar" as any,
+          },
+          {
+            path: "path.a.to.change2",
+            propertyChangeType: "Modify",
+            before: { tag1: "value" },
+            after: { tag2: "value" },
+          },
+          {
+            path: "path.a.to.change3",
+            propertyChangeType: "NoEffect",
+            after: 12345 as any,
+          },
+          {
+            path: "path.b.to.nested.change",
+            propertyChangeType: "Array",
+            children: [
               {
-                path: '4', propertyChangeType: 'Modify', children: [
-                  { path: 'foo.bar', propertyChangeType: 'Modify', before: true as any, after: false as any },
-                  { path: 'baz', propertyChangeType: 'Create', after: ['element1', 'element2'] as any }
-                ]
+                path: "4",
+                propertyChangeType: "Modify",
+                children: [
+                  {
+                    path: "foo.bar",
+                    propertyChangeType: "Modify",
+                    before: true as any,
+                    after: false as any,
+                  },
+                  {
+                    path: "baz",
+                    propertyChangeType: "Create",
+                    after: ["element1", "element2"] as any,
+                  },
+                ],
               },
-              { path: '5', propertyChangeType: 'Delete', before: 12345 as any }
-            ]
-          }
-        ]
-      }
+              { path: "5", propertyChangeType: "Delete", before: 12345 as any },
+            ],
+          },
+        ],
+      },
     ];
 
     const expected = `
@@ -346,7 +465,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <MAGENTA><RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result).toContain(expected);
   });
@@ -354,8 +473,9 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
   test("test_json_alignment", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
-        changeType: 'Delete',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+        changeType: "Delete",
         before: {
           apiVersion: "2020-04-01",
           numberValue: 1.2,
@@ -363,9 +483,9 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
           stringValue: "The quick brown fox jumps over the lazy dog.",
           emptyArray: [],
           emptyObject: {},
-          arrayContaingValues: ["foo", "bar"]
-        }
-      }
+          arrayContaingValues: ["foo", "bar"],
+        },
+      },
     ];
 
     const expected = `
@@ -385,7 +505,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
       <RESET>]<RED><RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result).toContain(expected);
   });
@@ -393,32 +513,33 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
   test("test_property_changes_alignment", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
-        changeType: 'Modify',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+        changeType: "Modify",
         delta: [
           {
             path: "path",
-            propertyChangeType: 'Delete',
-            before: {}
+            propertyChangeType: "Delete",
+            before: {},
           },
           {
             path: "long.path",
-            propertyChangeType: 'Create',
-            after: [] as any
+            propertyChangeType: "Create",
+            after: [] as any,
           },
           {
             path: "long.nested.path",
-            propertyChangeType: 'Array',
+            propertyChangeType: "Array",
             children: [
               {
                 path: "5",
-                propertyChangeType: 'Delete',
-                before: 12345 as any
-              }
-            ]
-          }
-        ]
-      }
+                propertyChangeType: "Delete",
+                before: 12345 as any,
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const expected = `
@@ -433,7 +554,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <MAGENTA><RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
     expect(result).toContain(expected);
   });
@@ -441,51 +562,52 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
   test("test_nested_array_changes", () => {
     const changes: WhatIfChange[] = [
       {
-        resourceId: "/subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4/providers/Microsoft.DocumentDB/databaseAccounts/myaccount/sqlDatabases/accesscontrol/containers/workflows",
-        changeType: 'Modify',
+        resourceId:
+          "/subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4/providers/Microsoft.DocumentDB/databaseAccounts/myaccount/sqlDatabases/accesscontrol/containers/workflows",
+        changeType: "Modify",
         delta: [
           {
             path: "properties.resource.indexingPolicy.compositeIndexes",
-            propertyChangeType: 'Array',
+            propertyChangeType: "Array",
             children: [
               {
                 path: "0",
-                propertyChangeType: 'Modify',
+                propertyChangeType: "Modify",
                 children: [
                   {
                     path: null as any,
-                    propertyChangeType: 'Array',
+                    propertyChangeType: "Array",
                     children: [
                       {
                         path: "0",
-                        propertyChangeType: 'Modify',
+                        propertyChangeType: "Modify",
                         children: [
                           {
                             path: "order",
-                            propertyChangeType: 'Delete',
-                            before: "ascending" as any
-                          }
-                        ]
+                            propertyChangeType: "Delete",
+                            before: "ascending" as any,
+                          },
+                        ],
                       },
                       {
                         path: "1",
-                        propertyChangeType: 'Modify',
+                        propertyChangeType: "Modify",
                         children: [
                           {
                             path: "order",
-                            propertyChangeType: 'Delete',
-                            before: "ascending"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
+                            propertyChangeType: "Delete",
+                            before: "ascending",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const expected = `
@@ -510,8 +632,13 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
 <MAGENTA><RESET>
 `;
 
-    const result = formatWhatIfOperationResult({ changes }, 'debug');
+    const result = formatWhatIfOperationResult({ changes }, "debug");
 
-    expect(result.split('\n').map(x => x.trimEnd()).join('\n')).toContain(expected);
+    expect(
+      result
+        .split("\n")
+        .map(x => x.trimEnd())
+        .join("\n"),
+    ).toContain(expected);
   });
 });

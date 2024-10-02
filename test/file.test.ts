@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { configureCompileMock, configureCompileParamsMock } from './mocks/bicepNodeMocks';
-import { configureReadFile } from './mocks/fsMocks';
+import {
+  configureCompileMock,
+  configureCompileParamsMock,
+} from "./mocks/bicepNodeMocks";
+import { configureReadFile } from "./mocks/fsMocks";
 import { FileConfig } from "../src/config";
-import { getJsonParameters, getTemplateAndParameters } from "../src/helpers/file";
+import {
+  getJsonParameters,
+  getTemplateAndParameters,
+} from "../src/helpers/file";
 import { readTestFile } from "./utils";
 
 describe("file parsing", () => {
@@ -25,12 +31,12 @@ describe("file parsing", () => {
       await getTemplateAndParameters(config);
 
     expect(templateContents["$schema"]).toEqual(
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     );
     expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
     expect(parametersContents["$schema"]).toEqual(
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     );
     expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
   });
@@ -39,14 +45,14 @@ describe("file parsing", () => {
     const config: FileConfig = {
       parametersFile: "/path/to/main.bicepparam",
       parameters: {
-        overrideMe: 'foo',
-      }
+        overrideMe: "foo",
+      },
     };
 
     configureCompileParamsMock(req => {
       expect(req).toEqual({
         path: "/path/to/main.bicepparam",
-        parameterOverrides: {overrideMe: 'foo'},
+        parameterOverrides: { overrideMe: "foo" },
       });
 
       return {
@@ -61,12 +67,12 @@ describe("file parsing", () => {
       await getTemplateAndParameters(config);
 
     expect(templateContents["$schema"]).toEqual(
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     );
     expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
     expect(parametersContents["$schema"]).toEqual(
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     );
     expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
   });
@@ -99,12 +105,12 @@ describe("file parsing", () => {
       await getTemplateAndParameters(config);
 
     expect(templateContents["$schema"]).toEqual(
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     );
     expect(templateContents["parameters"]["stringParam"]).toBeDefined();
 
     expect(parametersContents["$schema"]).toEqual(
-      "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#"
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     );
     expect(parametersContents["parameters"]["stringParam"]).toBeDefined();
   });
@@ -116,7 +122,7 @@ describe("file parsing", () => {
     };
 
     expect(async () => await getTemplateAndParameters(config)).rejects.toThrow(
-      "Unsupported parameters file type: /path/to/parameters.what"
+      "Unsupported parameters file type: /path/to/parameters.what",
     );
   });
 
@@ -127,13 +133,13 @@ describe("file parsing", () => {
     };
 
     expect(async () => await getTemplateAndParameters(config)).rejects.toThrow(
-      "Unsupported template file type: /path/to/main.what"
+      "Unsupported template file type: /path/to/main.what",
     );
   });
 });
 
 describe("file parsing with parameters", () => {
-  it('accepts parameter overrides', async () => {
+  it("accepts parameter overrides", async () => {
     configureReadFile(filePath => {
       if (filePath === "/parameters.json")
         return readTestFile("files/basic/main.parameters.json");
@@ -144,26 +150,26 @@ describe("file parsing with parameters", () => {
       parametersFile: "/parameters.json",
       parameters: {
         objectParam: "this param has been overridden!",
-      }
+      },
     });
 
     expect(JSON.parse(parameters).parameters).toEqual({
       intParam: {
-        value: 42
+        value: 42,
       },
       objectParam: {
-        value: "this param has been overridden!"
+        value: "this param has been overridden!",
       },
       stringParam: {
-        value: "hello world"
+        value: "hello world",
       },
     });
   });
 
-  it('can override missing parameters', async () => {
+  it("can override missing parameters", async () => {
     configureReadFile(filePath => {
       if (filePath === "/parameters.json")
-        return JSON.stringify({parameters: {}});
+        return JSON.stringify({ parameters: {} });
       throw `Unexpected file path: ${filePath}`;
     });
 
@@ -171,26 +177,26 @@ describe("file parsing with parameters", () => {
       parametersFile: "/parameters.json",
       parameters: {
         objectParam: "this param has been overridden!",
-      }
+      },
     });
 
     expect(JSON.parse(parameters).parameters).toEqual({
       objectParam: {
-        value: "this param has been overridden!"
+        value: "this param has been overridden!",
       },
     });
   });
 
-  it('works without a parameters file', async () => {
+  it("works without a parameters file", async () => {
     const parameters = await getJsonParameters({
       parameters: {
         objectParam: "this param has been overridden!",
-      }
+      },
     });
 
     expect(JSON.parse(parameters).parameters).toEqual({
       objectParam: {
-        value: "this param has been overridden!"
+        value: "this param has been overridden!",
       },
     });
   });
