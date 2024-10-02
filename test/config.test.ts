@@ -10,6 +10,7 @@ import {
 describe("input validation", () => {
   it("requires type", async () => {
     configureGetInputMock({});
+
     expect(() => parseConfig()).toThrow(
       "Action input 'type' is required but not provided",
     );
@@ -17,6 +18,7 @@ describe("input validation", () => {
 
   it("requires a valid value for type", async () => {
     configureGetInputMock({ type: "foo" });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'type' must be one of the following values: 'deployment', 'deploymentStack'",
     );
@@ -24,6 +26,7 @@ describe("input validation", () => {
 
   it("requires valid json for tags", async () => {
     configureGetInputMock({ type: "deployment", tags: "invalid" });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'tags' must be a valid JSON object",
     );
@@ -31,6 +34,7 @@ describe("input validation", () => {
 
   it("requires valid json for tags", async () => {
     configureGetInputMock({ type: "deployment", tags: '{"foo": {}}' });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'tags' must be a valid JSON object",
     );
@@ -38,6 +42,7 @@ describe("input validation", () => {
 
   it("requires operation to be provided", async () => {
     configureGetInputMock({ type: "deployment" });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'operation' is required but not provided",
     );
@@ -45,6 +50,7 @@ describe("input validation", () => {
 
   it("requires valid operation for deployment", async () => {
     configureGetInputMock({ type: "deployment", operation: "delete" });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'operation' must be one of the following values: 'create', 'validate', 'whatIf'",
     );
@@ -52,6 +58,7 @@ describe("input validation", () => {
 
   it("requires valid operation for deploymentStacks", async () => {
     configureGetInputMock({ type: "deploymentStack", operation: "whatIf" });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'operation' must be one of the following values: 'create', 'validate', 'delete'",
     );
@@ -63,6 +70,7 @@ describe("input validation", () => {
       operation: "create",
       scope: "subscription",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'subscription-id' is required but not provided",
     );
@@ -74,6 +82,7 @@ describe("input validation", () => {
       operation: "create",
       scope: "resourceGroup",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'subscription-id' is required but not provided",
     );
@@ -86,6 +95,7 @@ describe("input validation", () => {
       scope: "resourceGroup",
       "subscription-id": "foo",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'resource-group-name' is required but not provided",
     );
@@ -97,6 +107,7 @@ describe("input validation", () => {
       operation: "create",
       scope: "managementGroup",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'management-group-id' is required but not provided",
     );
@@ -108,6 +119,7 @@ describe("input validation", () => {
       operation: "create",
       scope: "tenant",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'scope' must be one of the following values: 'managementGroup', 'subscription', 'resourceGroup'",
     );
@@ -122,6 +134,7 @@ describe("input validation", () => {
       "resource-group-name": "mockRg",
       "what-if-exclude-change-types": "blah",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'what-if-exclude-change-types' must be one of the following values: 'create', 'delete', 'modify', 'deploy', 'noChange', 'ignore', 'unsupported'",
     );
@@ -135,6 +148,7 @@ describe("input validation", () => {
       "subscription-id": "foo",
       "resource-group-name": "mockRg",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'action-on-unmanage-resources' is required but not provided",
     );
@@ -149,6 +163,7 @@ describe("input validation", () => {
       "resource-group-name": "mockRg",
       "action-on-unmanage-resources": "sadf",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'action-on-unmanage-resources' must be one of the following values: 'delete', 'detach'",
     );
@@ -164,6 +179,7 @@ describe("input validation", () => {
       "action-on-unmanage-resources": "detach",
       "action-on-unmanage-resourcegroups": "sadf",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'action-on-unmanage-resourcegroups' must be one of the following values: 'delete', 'detach'",
     );
@@ -179,6 +195,7 @@ describe("input validation", () => {
       "action-on-unmanage-resources": "detach",
       "action-on-unmanage-managementgroups": "sadf",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'action-on-unmanage-managementgroups' must be one of the following values: 'delete', 'detach'",
     );
@@ -193,6 +210,7 @@ describe("input validation", () => {
       "resource-group-name": "mockRg",
       "action-on-unmanage-resources": "detach",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'deny-settings-mode' is required but not provided",
     );
@@ -208,6 +226,7 @@ describe("input validation", () => {
       "action-on-unmanage-resources": "detach",
       "deny-settings-mode": "asdfasdf",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'deny-settings-mode' must be one of the following values: 'denyDelete', 'denyWriteAndDelete', 'none'",
     );
@@ -223,6 +242,7 @@ describe("input validation", () => {
       "action-on-unmanage-resources": "detach",
       "bypass-stack-out-of-sync-error": "asdfasdf",
     });
+
     expect(() => parseConfig()).toThrow(
       "Action input 'bypass-stack-out-of-sync-error' must be a boolean value",
     );
@@ -248,6 +268,7 @@ describe("input parsing", () => {
     });
 
     const config = parseConfig();
+
     expect(config).toEqual<DeploymentsConfig>({
       type: "deployment",
       name: "mockName",
@@ -295,6 +316,7 @@ describe("input parsing", () => {
     });
 
     const config = parseConfig();
+
     expect(config).toEqual<DeploymentStackConfig>({
       type: "deploymentStack",
       name: "mockName",

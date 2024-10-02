@@ -23,7 +23,7 @@ describe("formatJson tests", () => {
 
   it("test_non_empty_array", () => {
     const value = Array.from({ length: 11 }, (_, i) => i);
-    let expected = `<RESET>[<RESET>
+    const expected = `<RESET>[<RESET>
   0<RESET>:<RESET>  0
   1<RESET>:<RESET>  1
   2<RESET>:<RESET>  2
@@ -45,7 +45,7 @@ describe("formatJson tests", () => {
       path: { to: { foo: "foo" } },
       longPath: { to: { bar: "bar" } },
     };
-    let expected = `
+    const expected = `
 
   path.to.foo<RESET>:<RESET>     "foo"
   longPath.to.bar<RESET>:<RESET> "bar"
@@ -68,7 +68,7 @@ describe("formatJson tests", () => {
       },
     };
 
-    let expected = `
+    const expected = `
 
   root.foo<RESET>:<RESET>    1234
   root.bar<RESET>:<RESET> <RESET>[<RESET>
@@ -92,7 +92,7 @@ describe("formatJson tests", () => {
   });
 });
 
-describe("TestFormatWhatIfOperationResult", () => {
+describe("testFormatWhatIfOperationResult", () => {
   it("test_change_type_legend", () => {
     const changes: WhatIfChange[] = [
       {
@@ -344,7 +344,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
       numberValue<RESET>:<GREEN>  1.2
       booleanValue<RESET>:<GREEN> true
-      stringValue<RESET>:<GREEN>  \"The quick brown fox jumps over the lazy dog.\"
+      stringValue<RESET>:<GREEN>  "The quick brown fox jumps over the lazy dog."
 <RESET>
 `;
 
@@ -373,10 +373,10 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <RED>
   - p1/foo<RESET> [2020-04-01]<RED>
 
-      apiVersion<RESET>:<RED>   \"2020-04-01\"
+      apiVersion<RESET>:<RED>   "2020-04-01"
       numberValue<RESET>:<RED>  1.2
       booleanValue<RESET>:<RED> true
-      stringValue<RESET>:<RED>  \"The quick brown fox jumps over the lazy dog.\"
+      stringValue<RESET>:<RED>  "The quick brown fox jumps over the lazy dog."
 <RESET>
 `;
 
@@ -441,22 +441,22 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <MAGENTA>
   ~ p1/foo<RESET>
-    <MAGENTA>~<RESET> path.a.to.change<RESET>:<RESET>  <RED>\"foo\"<RESET> => <GREEN>\"bar\"<RESET>
+    <MAGENTA>~<RESET> path.a.to.change<RESET>:<RESET>  <RED>"foo"<RESET> => <GREEN>"bar"<RESET>
     <MAGENTA>~<RESET> path.a.to.change2<RESET>:<RESET><RED>
 
-        tag1<RESET>:<RED> \"value\"
+        tag1<RESET>:<RED> "value"
 <RESET>
       =><GREEN>
 
-        tag2<RESET>:<GREEN> \"value\"
+        tag2<RESET>:<GREEN> "value"
 <RESET>
     <MAGENTA>~<RESET> path.b.to.nested.change<RESET>:<RESET> [
       <RED>-<RESET> 5<RESET>:<RESET> <RED>12345<RESET>
       <MAGENTA>~<RESET> 4<RESET>:<RESET>
 
         <GREEN>+<RESET> baz<RESET>:<RESET> <GREEN><RESET>[<GREEN>
-            0<RESET>:<GREEN> \"element1\"
-            1<RESET>:<GREEN> \"element2\"
+            0<RESET>:<GREEN> "element1"
+            1<RESET>:<GREEN> "element2"
           <RESET>]<GREEN><RESET>
         <MAGENTA>~<RESET> foo.bar<RESET>:<RESET> <RED>true<RESET> => <GREEN>false<RESET>
 
@@ -493,15 +493,15 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 <RED>
   - p1/foo<RESET> [2020-04-01]<RED>
 
-      apiVersion<RESET>:<RED>   \"2020-04-01\"
+      apiVersion<RESET>:<RED>   "2020-04-01"
       numberValue<RESET>:<RED>  1.2
       booleanValue<RESET>:<RED> true
-      stringValue<RESET>:<RED>  \"The quick brown fox jumps over the lazy dog.\"
+      stringValue<RESET>:<RED>  "The quick brown fox jumps over the lazy dog."
       emptyArray<RESET>:<RED>   []
       emptyObject<RESET>:<RED>  {}
       arrayContaingValues<RESET>:<RED> <RESET>[<RED>
-        0<RESET>:<RED> \"foo\"
-        1<RESET>:<RED> \"bar\"
+        0<RESET>:<RED> "foo"
+        1<RESET>:<RED> "bar"
       <RESET>]<RED><RESET>
 `;
 
@@ -620,11 +620,11 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
         [
         <MAGENTA>~<RESET> 0<RESET>:<RESET>
 
-          <RED>-<RESET> order<RESET>:<RESET> <RED>\"ascending\"<RESET>
+          <RED>-<RESET> order<RESET>:<RESET> <RED>"ascending"<RESET>
 
         <MAGENTA>~<RESET> 1<RESET>:<RESET>
 
-          <RED>-<RESET> order<RESET>:<RESET> <RED>\"ascending\"<RESET>
+          <RED>-<RESET> order<RESET>:<RESET> <RED>"ascending"<RESET>
 
         ]
 

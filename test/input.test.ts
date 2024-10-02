@@ -14,6 +14,7 @@ import {
 describe("getRequiredStringInput", () => {
   it("throws for missing required input", async () => {
     configureGetInputMock({});
+
     expect(() => getRequiredStringInput("type")).toThrow(
       "Action input 'type' is required but not provided",
     );
@@ -21,11 +22,13 @@ describe("getRequiredStringInput", () => {
 
   it("accepts input", async () => {
     configureGetInputMock({ type: "foo" });
+
     expect(getRequiredStringInput("type")).toEqual("foo");
   });
 
   it("trims input", async () => {
     configureGetInputMock({ type: "  foo   " });
+
     expect(getRequiredStringInput("type")).toEqual("foo");
   });
 });
@@ -33,16 +36,19 @@ describe("getRequiredStringInput", () => {
 describe("getOptionalStringInput", () => {
   it("returns empty for missing input", async () => {
     configureGetInputMock({});
+
     expect(getOptionalStringInput("type")).not.toBeDefined();
   });
 
   it("accepts input", async () => {
     configureGetInputMock({ type: "foo" });
+
     expect(getOptionalStringInput("type")).toEqual("foo");
   });
 
   it("trims input", async () => {
     configureGetInputMock({ type: "  foo   " });
+
     expect(getOptionalStringInput("type")).toEqual("foo");
   });
 });
@@ -50,16 +56,19 @@ describe("getOptionalStringInput", () => {
 describe("getOptionalStringArrayInput", () => {
   it("returns empty for missing input", async () => {
     configureGetInputMock({});
+
     expect(getOptionalStringArrayInput("type")).toEqual([]);
   });
 
   it("accepts a single input", async () => {
     configureGetInputMock({ type: "foo" });
+
     expect(getOptionalStringArrayInput("type")).toEqual(["foo"]);
   });
 
   it("accepts comma-separated input", async () => {
     configureGetInputMock({ type: "foo,bar,baz,foo" });
+
     expect(getOptionalStringArrayInput("type")).toEqual([
       "foo",
       "bar",
@@ -70,6 +79,7 @@ describe("getOptionalStringArrayInput", () => {
 
   it("trims input", async () => {
     configureGetInputMock({ type: " foo , bar      ,     baz,foo" });
+
     expect(getOptionalStringArrayInput("type")).toEqual([
       "foo",
       "bar",
@@ -82,11 +92,13 @@ describe("getOptionalStringArrayInput", () => {
 describe("getOptionalEnumArrayInput", () => {
   it("returns empty for missing input", async () => {
     configureGetInputMock({});
+
     expect(getOptionalEnumArrayInput("type", ["foo", "bar"])).toEqual([]);
   });
 
   it("accepts a single input", async () => {
     configureGetInputMock({ type: "foo" });
+
     expect(getOptionalEnumArrayInput("type", ["foo", "bar", "baz"])).toEqual([
       "foo",
     ]);
@@ -94,6 +106,7 @@ describe("getOptionalEnumArrayInput", () => {
 
   it("accepts comma-separated input", async () => {
     configureGetInputMock({ type: "foo,bar,baz,foo" });
+
     expect(getOptionalEnumArrayInput("type", ["foo", "bar", "baz"])).toEqual([
       "foo",
       "bar",
@@ -104,6 +117,7 @@ describe("getOptionalEnumArrayInput", () => {
 
   it("trims input", async () => {
     configureGetInputMock({ type: " foo , bar      ,     baz,foo" });
+
     expect(getOptionalEnumArrayInput("type", ["foo", "bar", "baz"])).toEqual([
       "foo",
       "bar",
@@ -114,6 +128,7 @@ describe("getOptionalEnumArrayInput", () => {
 
   it("throws for unexpected enum input", async () => {
     configureGetInputMock({ type: "foo,qux,baz" });
+
     expect(() =>
       getOptionalEnumArrayInput("type", ["foo", "bar", "baz"]),
     ).toThrow(
@@ -125,21 +140,25 @@ describe("getOptionalEnumArrayInput", () => {
 describe("getOptionalBooleanInput", () => {
   it("returns false for missing input", async () => {
     configureGetInputMock({});
+
     expect(getOptionalBooleanInput("type")).toEqual(false);
   });
 
   it("trims input", async () => {
     configureGetInputMock({ type: " true   " });
+
     expect(getOptionalBooleanInput("type")).toEqual(true);
   });
 
   it("accepts different casings", async () => {
     configureGetInputMock({ type: " TrUe   " });
+
     expect(getOptionalBooleanInput("type")).toEqual(true);
   });
 
   it("accepts false", async () => {
     configureGetInputMock({ type: " false   " });
+
     expect(getOptionalBooleanInput("type")).toEqual(false);
   });
 });
@@ -147,11 +166,13 @@ describe("getOptionalBooleanInput", () => {
 describe("getOptionalDictionaryInput", () => {
   it("returns empty object for missing input", async () => {
     configureGetInputMock({});
+
     expect(getOptionalDictionaryInput("type")).toEqual({});
   });
 
   it("throws for unexpected input", async () => {
     configureGetInputMock({ type: "notanobject" });
+
     expect(() => getOptionalDictionaryInput("type")).toThrow(
       "Action input 'type' must be a valid JSON object",
     );
@@ -159,6 +180,7 @@ describe("getOptionalDictionaryInput", () => {
 
   it("parses and returns json input", async () => {
     configureGetInputMock({ type: ' {"abc": "def"} ' });
+
     expect(getOptionalDictionaryInput("type")).toEqual({
       abc: "def",
     });
@@ -181,6 +203,7 @@ describe("getOptionalDictionaryInput", () => {
   }
 }`,
     });
+
     expect(getOptionalDictionaryInput("type")).toEqual({
       intParam: { value: 42 },
       stringParam: { value: "hello world" },
@@ -192,11 +215,13 @@ describe("getOptionalDictionaryInput", () => {
 describe("getOptionalStringDictionaryInput", () => {
   it("returns empty object for missing input", async () => {
     configureGetInputMock({});
+
     expect(getOptionalStringDictionaryInput("type")).toEqual({});
   });
 
   it("throws for unexpected input", async () => {
     configureGetInputMock({ type: "notanobject" });
+
     expect(() => getOptionalStringDictionaryInput("type")).toThrow(
       "Action input 'type' must be a valid JSON object",
     );
@@ -204,6 +229,7 @@ describe("getOptionalStringDictionaryInput", () => {
 
   it("parses and returns json input", async () => {
     configureGetInputMock({ type: ' {"abc": "def"} ' });
+
     expect(getOptionalStringDictionaryInput("type")).toEqual({
       abc: "def",
     });
@@ -211,6 +237,7 @@ describe("getOptionalStringDictionaryInput", () => {
 
   it("only accepts string values", async () => {
     configureGetInputMock({ type: '{ "abc": { "def": "ghi" } }' });
+
     expect(() => getOptionalStringDictionaryInput("type")).toThrow(
       "Action input 'type' must be a valid JSON object containing only string values",
     );
