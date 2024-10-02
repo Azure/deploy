@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import { mockActionsCore } from './mocks/actionCoreMocks';
 import { mockDeploymentsOps, mockStacksOps, azureMock } from './mocks/azureMocks';
 import { RestError } from "@azure/core-rest-pipeline";
@@ -52,7 +54,7 @@ describe('deployment execution', () => {
       ...expectedPayload,
       properties: { ...expectedProperties, outputs: {mockOutput: { value: 'foo' }} },
     };
-    
+
     it('deploys', async () => {
       mockDeploymentsOps.beginCreateOrUpdateAtSubscriptionScopeAndWait!.mockReturnValue(Promise.resolve(mockReturnPayload));
 
@@ -62,14 +64,14 @@ describe('deployment execution', () => {
       expect(mockDeploymentsOps.beginCreateOrUpdateAtSubscriptionScopeAndWait).toHaveBeenCalledWith(config.name, expectedPayload);
       expect(mockActionsCore.setOutput).toHaveBeenCalledWith('mockOutput', 'foo');
     });
-    
+
     it('validates', async () => {
       await execute({...config, operation: 'validate'}, files);
 
       expect(azureMock.createDeploymentClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
       expect(mockDeploymentsOps.beginValidateAtSubscriptionScopeAndWait).toHaveBeenCalledWith(config.name, expectedPayload);
     });
-    
+
     it('what-ifs', async () => {
       mockDeploymentsOps.beginWhatIfAtSubscriptionScopeAndWait!.mockReturnValue(Promise.resolve({}));
 
@@ -138,7 +140,7 @@ describe('deployment execution', () => {
         }
       ]
     };
-    
+
     it('deploys', async () => {
       mockDeploymentsOps.beginCreateOrUpdateAndWait!.mockReturnValue(Promise.resolve(mockReturnPayload));
 
@@ -148,7 +150,7 @@ describe('deployment execution', () => {
       expect(mockDeploymentsOps.beginCreateOrUpdateAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
       expect(mockActionsCore.setOutput).toHaveBeenCalledWith('mockOutput', 'foo');
     });
-    
+
     it('handles deploy errors', async () => {
       mockDeploymentsOps.beginCreateOrUpdateAndWait!.mockRejectedValue(getMockRestError(mockError));
 
@@ -159,14 +161,14 @@ describe('deployment execution', () => {
 
       expect(mockActionsCore.error).toHaveBeenCalledWith(colorize(JSON.stringify(mockError, null, 2), Color.Red));
     });
-    
+
     it('validates', async () => {
       await execute({...config, operation: 'validate'}, files);
 
       expect(azureMock.createDeploymentClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
       expect(mockDeploymentsOps.beginValidateAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
     });
-    
+
     it('handles validate errors', async () => {
       mockDeploymentsOps.beginValidateAndWait!.mockRejectedValue(getMockRestError(mockError));
 
@@ -177,7 +179,7 @@ describe('deployment execution', () => {
 
       expect(mockActionsCore.error).toHaveBeenCalledWith(colorize(JSON.stringify(mockError, null, 2), Color.Red));
     });
-    
+
     it('what-ifs', async () => {
       mockDeploymentsOps.beginWhatIfAndWait!.mockReturnValue(Promise.resolve({}));
 
@@ -239,7 +241,7 @@ describe('stack execution', () => {
       ...expectedPayload,
       properties: { ...expectedProperties, outputs: {mockOutput: { value: 'foo' }} },
     };
-    
+
     it('deploys', async () => {
       mockStacksOps.beginCreateOrUpdateAtSubscriptionAndWait!.mockReturnValue(Promise.resolve(mockReturnPayload));
 
@@ -249,14 +251,14 @@ describe('stack execution', () => {
       expect(mockStacksOps.beginCreateOrUpdateAtSubscriptionAndWait).toHaveBeenCalledWith(config.name, expectedPayload);
       expect(mockActionsCore.setOutput).toHaveBeenCalledWith('mockOutput', 'foo');
     });
-    
+
     it('validates', async () => {
       await execute({...config, operation: 'validate'}, files);
 
       expect(azureMock.createStacksClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
       expect(mockStacksOps.beginValidateStackAtSubscriptionAndWait).toHaveBeenCalledWith(config.name, expectedPayload);
     });
-    
+
     it('deletes', async () => {
       await execute({...config, operation: 'delete'}, files);
 
@@ -313,7 +315,7 @@ describe('stack execution', () => {
       ...expectedPayload,
       properties: { ...expectedProperties, outputs: {mockOutput: { value: 'foo' }} },
     };
-    
+
     it('deploys', async () => {
       mockStacksOps.beginCreateOrUpdateAtResourceGroupAndWait!.mockReturnValue(Promise.resolve(mockReturnPayload));
 
@@ -323,14 +325,14 @@ describe('stack execution', () => {
       expect(mockStacksOps.beginCreateOrUpdateAtResourceGroupAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
       expect(mockActionsCore.setOutput).toHaveBeenCalledWith('mockOutput', 'foo');
     });
-    
+
     it('validates', async () => {
       await execute({...config, operation: 'validate'}, files);
 
       expect(azureMock.createStacksClient).toHaveBeenCalledWith(scope.subscriptionId, undefined);
       expect(mockStacksOps.beginValidateStackAtResourceGroupAndWait).toHaveBeenCalledWith(scope.resourceGroup, config.name, expectedPayload);
     });
-    
+
     it('deletes', async () => {
       await execute({...config, operation: 'delete'}, files);
 
