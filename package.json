@@ -26,8 +26,8 @@
     "test": "jest --config jest.config.unit.ts",
     "test:live": "jest --config jest.config.live.ts",
     "package": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
-    "lint": "eslint src --ext ts",
-    "lint:fix": "eslint src --ext ts --fix"
+    "lint": "eslint src test test-live --ext ts",
+    "lint:fix": "eslint src test test-live --ext ts --fix"
   },
   "license": "MIT",
   "dependencies": {
