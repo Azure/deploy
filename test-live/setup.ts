@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import { parse } from 'yaml'
 import * as process from 'process'
 

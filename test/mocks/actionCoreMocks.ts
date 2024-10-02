@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 export const mockActionsCore = {
   info: jest.fn().mockImplementation(console.info),
   warning: jest.fn().mockImplementation(console.warn),
