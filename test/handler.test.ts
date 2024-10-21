@@ -29,6 +29,8 @@ import {
 import { Color, colorize } from "../src/helpers/logging";
 
 describe("deployment execution", () => {
+  afterEach(() => jest.clearAllMocks());
+
   describe("subscription scope", () => {
     const scope: SubscriptionScope = {
       type: "subscription",
@@ -95,6 +97,17 @@ describe("deployment execution", () => {
         "mockOutput",
         "foo",
       );
+      expect(mockActionsCore.setSecret).not.toHaveBeenCalled();
+    });
+
+    it("masks secure values", async () => {
+      mockDeploymentsOps.beginCreateOrUpdateAtSubscriptionScopeAndWait!.mockResolvedValue(
+        mockReturnPayload,
+      );
+
+      await execute({ ...config, maskedOutputs: ["mockOutput"] }, files);
+
+      expect(mockActionsCore.setSecret).toHaveBeenCalledWith("foo");
     });
 
     it("validates", async () => {
@@ -210,6 +223,17 @@ describe("deployment execution", () => {
         "mockOutput",
         "foo",
       );
+      expect(mockActionsCore.setSecret).not.toHaveBeenCalled();
+    });
+
+    it("masks secure values", async () => {
+      mockDeploymentsOps.beginCreateOrUpdateAtSubscriptionScopeAndWait!.mockResolvedValue(
+        mockReturnPayload,
+      );
+
+      await execute({ ...config, maskedOutputs: ["mockOutput"] }, files);
+
+      expect(mockActionsCore.setSecret).toHaveBeenCalledWith("foo");
     });
 
     it("handles deploy errors", async () => {
@@ -287,6 +311,8 @@ describe("deployment execution", () => {
 });
 
 describe("stack execution", () => {
+  afterEach(() => jest.clearAllMocks());
+
   describe("subscription scope", () => {
     const scope: SubscriptionScope = {
       type: "subscription",
@@ -360,6 +386,17 @@ describe("stack execution", () => {
         "mockOutput",
         "foo",
       );
+      expect(mockActionsCore.setSecret).not.toHaveBeenCalled();
+    });
+
+    it("masks secure values", async () => {
+      mockStacksOps.beginCreateOrUpdateAtSubscriptionAndWait!.mockResolvedValue(
+        mockReturnPayload,
+      );
+
+      await execute({ ...config, maskedOutputs: ["mockOutput"] }, files);
+
+      expect(mockActionsCore.setSecret).toHaveBeenCalledWith("foo");
     });
 
     it("validates", async () => {
@@ -459,6 +496,17 @@ describe("stack execution", () => {
         "mockOutput",
         "foo",
       );
+      expect(mockActionsCore.setSecret).not.toHaveBeenCalled();
+    });
+
+    it("masks secure values", async () => {
+      mockStacksOps.beginCreateOrUpdateAtSubscriptionAndWait!.mockResolvedValue(
+        mockReturnPayload,
+      );
+
+      await execute({ ...config, maskedOutputs: ["mockOutput"] }, files);
+
+      expect(mockActionsCore.setSecret).toHaveBeenCalledWith("foo");
     });
 
     it("validates", async () => {

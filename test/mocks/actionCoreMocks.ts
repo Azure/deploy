@@ -7,6 +7,7 @@ export const mockActionsCore = {
   getInput: jest.fn(),
   setFailed: jest.fn(),
   setOutput: jest.fn(),
+  setSecret: jest.fn(),
 };
 
 // eslint-disable-next-line jest/no-untyped-mock-factory
