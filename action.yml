@@ -85,6 +85,10 @@ inputs:
     description: "Specifies the tags for the deploymentStack."
     required: false
 
+  masked-outputs:
+    description: "Specifies output names to mask values for."
+    required: false
+
 runs:
   using: node20
   main: dist/index.js

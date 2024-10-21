@@ -49,6 +49,7 @@ type CommonConfig = {
   name?: string;
   location?: string;
   tags?: Record<string, string>;
+  maskedOutputs?: string[];
 } & FileConfig;
 
 type WhatIfChangeType =
@@ -102,6 +103,7 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
   const parameters = getOptionalDictionaryInput("parameters");
   const description = getOptionalStringInput("description");
   const tags = getOptionalStringDictionaryInput("tags");
+  const maskedOutputs = getOptionalStringArrayInput("masked-outputs");
 
   switch (type) {
     case "deployment": {
@@ -113,6 +115,7 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
         parametersFile,
         parameters,
         tags,
+        maskedOutputs,
         operation: getRequiredEnumInput("operation", [
           "create",
           "validate",
@@ -145,6 +148,7 @@ export function parseConfig(): DeploymentsConfig | DeploymentStackConfig {
         parameters,
         description,
         tags,
+        maskedOutputs,
         operation: getRequiredEnumInput("operation", [
           "create",
           "validate",

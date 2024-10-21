@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { setOutput, setFailed } from "@actions/core";
+import { setOutput, setFailed, setSecret } from "@actions/core";
 import { CloudError, Deployment, ErrorResponse } from "@azure/arm-resources";
 import { DeploymentStack } from "@azure/arm-resourcesdeploymentstacks";
 import { RestError } from "@azure/core-rest-pipeline";
@@ -60,7 +60,7 @@ export async function execute(config: ActionConfig, files: ParsedFiles) {
             await tryWithErrorHandling(
               async () => {
                 const result = await deploymentCreate(config, files);
-                setCreateOutputs(result?.properties?.outputs);
+                setCreateOutputs(config, result?.properties?.outputs);
               },
               error => {
                 logError(JSON.stringify(error, null, 2));
@@ -94,7 +94,7 @@ export async function execute(config: ActionConfig, files: ParsedFiles) {
             await tryWithErrorHandling(
               async () => {
                 const result = await stackCreate(config, files);
-                setCreateOutputs(result?.properties?.outputs);
+                setCreateOutputs(config, result?.properties?.outputs);
               },
               error => {
                 logError(JSON.stringify(error, null, 2));
@@ -137,7 +137,10 @@ export async function execute(config: ActionConfig, files: ParsedFiles) {
   }
 }
 
-function setCreateOutputs(outputs?: Record<string, unknown>) {
+function setCreateOutputs(
+  config: ActionConfig,
+  outputs?: Record<string, unknown>,
+) {
   if (!outputs) {
     return;
   }
@@ -145,6 +148,12 @@ function setCreateOutputs(outputs?: Record<string, unknown>) {
   for (const key of Object.keys(outputs)) {
     const output = outputs[key] as { value: string };
     setOutput(key, output.value);
+    if (
+      config.maskedOutputs &&
+      config.maskedOutputs.some(x => x.toLowerCase() === key.toLowerCase())
+    ) {
+      setSecret(output.value);
+    }
   }
 }
 

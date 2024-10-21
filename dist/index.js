@@ -59331,6 +59331,7 @@ function parseConfig() {
     const parameters = (0, input_1.getOptionalDictionaryInput)("parameters");
     const description = (0, input_1.getOptionalStringInput)("description");
     const tags = (0, input_1.getOptionalStringDictionaryInput)("tags");
+    const maskedOutputs = (0, input_1.getOptionalStringArrayInput)("masked-outputs");
     switch (type) {
         case "deployment": {
             return {
@@ -59341,6 +59342,7 @@ function parseConfig() {
                 parametersFile,
                 parameters,
                 tags,
+                maskedOutputs,
                 operation: (0, input_1.getRequiredEnumInput)("operation", [
                     "create",
                     "validate",
@@ -59370,6 +59372,7 @@ function parseConfig() {
                 parameters,
                 description,
                 tags,
+                maskedOutputs,
                 operation: (0, input_1.getRequiredEnumInput)("operation", [
                     "create",
                     "validate",
@@ -59518,7 +59521,7 @@ async function execute(config, files) {
                     case "create": {
                         await tryWithErrorHandling(async () => {
                             const result = await deploymentCreate(config, files);
-                            setCreateOutputs(result?.properties?.outputs);
+                            setCreateOutputs(config, result?.properties?.outputs);
                         }, error => {
                             (0, logging_1.logError)(JSON.stringify(error, null, 2));
                             (0, core_1.setFailed)("Create failed");
@@ -59546,7 +59549,7 @@ async function execute(config, files) {
                     case "create": {
                         await tryWithErrorHandling(async () => {
                             const result = await stackCreate(config, files);
-                            setCreateOutputs(result?.properties?.outputs);
+                            setCreateOutputs(config, result?.properties?.outputs);
                         }, error => {
                             (0, logging_1.logError)(JSON.stringify(error, null, 2));
                             (0, core_1.setFailed)("Create failed");
@@ -59580,13 +59583,17 @@ async function execute(config, files) {
         throw error;
     }
 }
-function setCreateOutputs(outputs) {
+function setCreateOutputs(config, outputs) {
     if (!outputs) {
         return;
     }
     for (const key of Object.keys(outputs)) {
         const output = outputs[key];
         (0, core_1.setOutput)(key, output.value);
+        if (config.maskedOutputs &&
+            config.maskedOutputs.some(x => x.toLowerCase() === key.toLowerCase())) {
+            (0, core_1.setSecret)(output.value);
+        }
     }
 }
 async function deploymentCreate(config, files) {

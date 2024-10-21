@@ -96,6 +96,7 @@ For end-to-end workflow examples, please see [Deployment](./examples/DEPLOYMENT.
 | `bypass-stack-out-of-sync-error`     | Specifies whether to bypass the stack out of sync error.            | `true`, `false`                                                                                                                                  |
 | `description`                        | Specifies the description of the deploymentStack.                   | Free-text                                                                                                                                        |
 | `tags`                               | Specifies the tags for the deploymentStack.                         | Free-text                                                                                                                                        |
+| `masked-outputs`                     | Specifies output names to mask values for.                          | Free-text                                                                                                                                        |
 
 ## Contributing
 

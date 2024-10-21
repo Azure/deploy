@@ -264,6 +264,7 @@ describe("input parsing", () => {
       parameters: '{"foo": "bar2"}',
       description: "mockDescription",
       tags: '{"foo": "bar"}',
+      "masked-outputs": "abc,def",
       "what-if-exclude-change-types": "noChange",
     });
 
@@ -288,6 +289,7 @@ describe("input parsing", () => {
       tags: {
         foo: "bar",
       },
+      maskedOutputs: ["abc", "def"],
       whatIf: {
         excludeChangeTypes: ["noChange"],
       },
@@ -307,6 +309,7 @@ describe("input parsing", () => {
       parameters: '{"foo": "bar2"}',
       description: "mockDescription",
       tags: '{"foo": "bar"}',
+      "masked-outputs": "abc,def",
       "action-on-unmanage-resources": "delete",
       "action-on-unmanage-resourcegroups": "delete",
       "action-on-unmanage-managementgroups": "delete",
@@ -337,6 +340,7 @@ describe("input parsing", () => {
       tags: {
         foo: "bar",
       },
+      maskedOutputs: ["abc", "def"],
       actionOnUnManage: {
         resources: "delete",
         resourceGroups: "delete",
