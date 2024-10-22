@@ -1,9 +1,5 @@
 # Azure Deployment Action
 
-> [!WARNING]
->
-> ## ⚠️ This repository is currently under development, and not ready for usage ⚠️
-
 This repository offers a GitHub Action for automating the deployment and management of Azure resources using ARM Templates or Bicep files. It integrates smoothly into GitHub workflows, allowing developers to manage Azure infrastructure directly within their CI/CD pipelines.
 
 With this action, users can:
