@@ -1,15 +1,15 @@
 {
-  "name": "deploy",
-  "description": "Azure Deploy GitHub Action",
+  "name": "bicep-deploy",
+  "description": "Bicep Deploy GitHub Action",
   "version": "0.0.1",
   "author": "Microsoft",
-  "homepage": "https://github.com/azure/deploy",
+  "homepage": "https://github.com/azure/bicep-deploy",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/azure/deploy.git"
+    "url": "git+https://github.com/azure/bicep-deploy.git"
   },
   "bugs": {
-    "url": "https://github.com/azure/deploy/issues"
+    "url": "https://github.com/azure/bicep-deploy/issues"
   },
   "keywords": [
     "bicep",

@@ -19,7 +19,7 @@ import { createDeploymentClient, createStacksClient } from "./helpers/azure";
 import { logError, logInfoRaw } from "./helpers/logging";
 import { formatWhatIfOperationResult } from "./helpers/whatif";
 
-const defaultName = "azure-deploy";
+const defaultName = "azure-bicep-deploy";
 
 function getDeploymentClient(
   scope:

@@ -74,7 +74,7 @@ jobs:
         run: npm run test:live
         env:
           LIVETEST_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          LIVETEST_RESOURCE_GROUP: azure-deploy-ci
+          LIVETEST_RESOURCE_GROUP: azure-bicep-deploy-ci
 
   tests-action:
     permissions:
@@ -114,7 +114,7 @@ jobs:
           name: ci-deploy-${{ matrix.os }}
           scope: resourceGroup
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: azure-deploy-ci
+          resource-group-name: azure-bicep-deploy-ci
           parameters-file: test/files/basic/main.bicepparam
 
       - name: Test Deployment - WhatIf
@@ -125,7 +125,7 @@ jobs:
           name: ci-deploy-${{ matrix.os }}
           scope: resourceGroup
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: azure-deploy-ci
+          resource-group-name: azure-bicep-deploy-ci
           parameters-file: test/files/basic/main.bicepparam
 
       - name: Test Deployment - Deploy
@@ -136,7 +136,7 @@ jobs:
           name: ci-deploy-${{ matrix.os }}
           scope: resourceGroup
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: azure-deploy-ci
+          resource-group-name: azure-bicep-deploy-ci
           parameters-file: test/files/basic/main.bicepparam
 
       - name: Test Local Action (Stack)
@@ -147,7 +147,7 @@ jobs:
           name: ci-stack-${{ matrix.os }}
           scope: resourceGroup
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: azure-deploy-ci
+          resource-group-name: azure-bicep-deploy-ci
           parameters-file: test/files/basic/main.bicepparam
           action-on-unmanage-resources: delete
           deny-settings-mode: denyDelete

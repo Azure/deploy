@@ -188,7 +188,7 @@ describe("deployment execution", () => {
     const mockError = {
       code: "InvalidTemplateDeployment",
       message:
-        "The template deployment 'bicep-deploy' is not valid according to the validation procedure. The tracking id is '06d4fb15-ecb0-4682-a6d9-1bf416ca0722'. See inner errors for details.",
+        "The template deployment 'azure-bicep-deploy' is not valid according to the validation procedure. The tracking id is '06d4fb15-ecb0-4682-a6d9-1bf416ca0722'. See inner errors for details.",
       details: [
         {
           code: "PreflightValidationCheckFailed",
