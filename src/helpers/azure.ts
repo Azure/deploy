@@ -12,8 +12,10 @@ export function createDeploymentClient(
 
   return new ResourceManagementClient(credentials, subscriptionId, {
     userAgentOptions: {
-      userAgentPrefix: "gha-azure-deploy",
+      userAgentPrefix: "gh-azure-bicep-deploy",
     },
+    // Use a recent API version to take advantage of error improvements
+    apiVersion: "2024-03-01",
   });
 }
 
@@ -25,7 +27,7 @@ export function createStacksClient(
 
   return new DeploymentStacksClient(credentials, subscriptionId, {
     userAgentOptions: {
-      userAgentPrefix: "gha-azure-deploy",
+      userAgentPrefix: "gh-azure-bicep-deploy",
     },
   });
 }

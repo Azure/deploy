@@ -59498,7 +59498,7 @@ const core_rest_pipeline_1 = __nccwpck_require__(778);
 const azure_1 = __nccwpck_require__(5886);
 const logging_1 = __nccwpck_require__(5504);
 const whatif_1 = __nccwpck_require__(5180);
-const defaultName = "azure-deploy";
+const defaultName = "azure-bicep-deploy";
 function getDeploymentClient(scope) {
     if (scope.type == "tenant" || scope.type == "managementGroup") {
         throw "Subscription ID is required"; // TODO how to handle this properly?
@@ -59809,15 +59809,17 @@ function createDeploymentClient(subscriptionId, tenantId) {
     const credentials = new identity_1.DefaultAzureCredential({ tenantId });
     return new arm_resources_1.ResourceManagementClient(credentials, subscriptionId, {
         userAgentOptions: {
-            userAgentPrefix: "gha-azure-deploy",
+            userAgentPrefix: "gh-azure-bicep-deploy",
         },
+        // Use a recent API version to take advantage of error improvements
+        apiVersion: "2024-03-01",
     });
 }
 function createStacksClient(subscriptionId, tenantId) {
     const credentials = new identity_1.DefaultAzureCredential({ tenantId });
     return new arm_resourcesdeploymentstacks_1.DeploymentStacksClient(credentials, subscriptionId, {
         userAgentOptions: {
-            userAgentPrefix: "gha-azure-deploy",
+            userAgentPrefix: "gh-azure-bicep-deploy",
         },
     });
 }

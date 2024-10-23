@@ -1,6 +1,6 @@
 {
-  "name": "deploy",
-  "description": "Azure Deploy GitHub Action",
+  "name": "bicep-deploy",
+  "description": "Bicep Deploy GitHub Action",
   "version": "0.0.1",
   "author": "Microsoft",
   "homepage": "https://github.com/azure/bicep-deploy",

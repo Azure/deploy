@@ -1,4 +1,4 @@
-name: "Azure Deploy"
+name: "Bicep Deploy"
 description: "GitHub Action for deploying to Azure"
 author: "Microsoft"
 

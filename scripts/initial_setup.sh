@@ -7,8 +7,8 @@ tenantId=${1:?"Missing tenantId. ${usage}"}
 subId=${2:?"Missing subscriptionId. ${usage}"}
 
 repoOwner="Azure"
-repoName="deploy"
-rgName="azure-deploy-ci"
+repoName="bicep-deploy"
+rgName="azure-bicep-deploy-ci"
 rgLocation="East US 2"
 
 az account set -n "$subId"
