@@ -1,10 +1,10 @@
 # Deployment Stacks
 
-This snippet demonstrates the default usage of the `azure/deploy@v1` GitHub Action to create a deployment stack. It deploys a "Development" environment in the `westus2` region at the subscription scope, using `main.bicep` as the template and `main.bicepparam` for parameters. The deployment also deletes untracked resources and resource groups as needed, applies deny settings to prevent write and delete actions, and includes a description for the stack.
+This snippet demonstrates the default usage of the `azure/bicep-deploy@v1` GitHub Action to create a deployment stack. It deploys a "Development" environment in the `westus2` region at the subscription scope, using `main.bicep` as the template and `main.bicepparam` for parameters. The deployment also deletes untracked resources and resource groups as needed, applies deny settings to prevent write and delete actions, and includes a description for the stack.
 
 ```yaml
 - name: Create
-  uses: azure/deploy@v1
+  uses: azure/bicep-deploy@v1
   with:
     operation: deploymentStack
     type: create
@@ -20,11 +20,11 @@ This snippet demonstrates the default usage of the `azure/deploy@v1` GitHub Acti
     description: "Development Environment"
 ```
 
-This snippet illustrates the default usage of the `azure/deploy@v1` action to create a deployment stack, with an emphasis on the parameters input. It initiates a "Development" stack in the `westus2` region for a specific Azure subscription. The parameters are given as a JSON object, specifying the resource name as "Development" and tagging it as "development." The configuration also includes deletion policies for unmanaged resources and resource groups, applies deny settings to restrict write and delete actions, and includes a description for the environment being created.
+This snippet illustrates the default usage of the `azure/bicep-deploy@v1` action to create a deployment stack, with an emphasis on the parameters input. It initiates a "Development" stack in the `westus2` region for a specific Azure subscription. The parameters are given as a JSON object, specifying the resource name as "Development" and tagging it as "development." The configuration also includes deletion policies for unmanaged resources and resource groups, applies deny settings to restrict write and delete actions, and includes a description for the environment being created.
 
 ```yaml
 - name: Create
-  uses: azure/deploy@v1
+  uses: azure/bicep-deploy@v1
   with:
     operation: deploymentStack
     type: create
@@ -73,7 +73,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Create
-        uses: azure/deploy@v1
+        uses: azure/bicep-deploy@v1
         with:
           operation: deploymentStack
           type: create
@@ -122,7 +122,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Validate
-        uses: azure/deploy@v1
+        uses: azure/bicep-deploy@v1
         with:
           operation: deploymentStack
           type: validate
@@ -164,7 +164,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Delete
-        uses: azure/deploy@v1
+        uses: azure/bicep-deploy@v1
         with:
           operation: deploymentStack
           type: delete
